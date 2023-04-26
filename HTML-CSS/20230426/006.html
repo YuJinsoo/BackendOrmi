@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko-KR">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>input</title>
+</head>
+<body>
+
+    <form method="get">
+        <input type="text", name="name", placeholder="이름" maxlength="10" minlength="3" required>
+        <input type="text", name="region", value="한국", disabled>
+        <input type="submit", value="button">
+    </form>
+
+    <input type="text", name="test", value="홍", disabled>
+    <input type="text", name="test", value="홍2", readonly>
+    <br>
+
+    <form method="get">
+        <input type="url" name="url">
+        <input type="email" name="email">
+        <input type="search" name="search">
+        <input type="tel" name="phone">
+        <input type="submit", value="button">
+    </form>
+
+    <br>
+    <input type="checkbox" id="chk1" checked><label for="chk1">동의하십니까?</label>
+    <input type="radio" name="gender" id="radio1" checked><label for="radio1">여성</label>
+    <input type="radio" name="gender" id="radio2"><label for="radio2">남성</label>
+
+    <br>
+    <input type="file" accept="image/jpg, image/png" multiple>
+
+    <br>
+    <input type="number" min="0" max="100" step="10">
+
+
+</body>
+</html>

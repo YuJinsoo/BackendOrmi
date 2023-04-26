@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ko-KR">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>block & line</title>
+    <style>
+        div{
+            background: salmon;
+            border: 1px solid black;
+            width: 100px;
+            height: 100px;
+            padding: 10px;
+            margin: 10px;
+            display: inline-block;
+            /*display: block; << defualt*/
+        }
+        span{
+            background: aquamarine;
+            border: 1px solid black;
+            width: 100px;
+            height: 100px;
+            padding: 10px;
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>블록 레벨 요소 vs 인라인 레벨 요소</h1>
+    <div>div</div>
+    <div>div</div>
+    <div>div</div>
+    <span>span</span><span>span</span><span>span</span>
+
+    <!-- 정상 -->
+    <div>div<span>span</span></div>
+    
+    <!-- 오류 -->
+    <span>span<div>div</div></span> 
+
+    <!-- 인라인요소이지만 오류아님 -->
+    <a href=#>
+        <div>div</div>
+    </a>
+</body>
+</html>
+
+<!-- 
+에러 라인 25, 칼럼 19: Element div not allowed as child of element span in this context. (Suppressing further errors from this subtree.)
+    <span>span<div>div</div></span> 
+Contexts in which element div may be used:
+Where flow content is expected.
+As a child of a dl element.
+Content model for element span:
+Phrasing content. -->
