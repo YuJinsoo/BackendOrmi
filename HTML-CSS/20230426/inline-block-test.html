@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ko-KR">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>block, inline, inline-block</title>
+    <style>
+        #box-container > div,
+        #box-container > span{
+            border: 2px solid #099;
+            margin: 3px 0;
+            padding: 5px;
+        }
+        .none{ display:none}
+        .block1{display: block}
+        .block2{display: block; width: 300px; height: 60px;}
+        .inline{ display: inline; width: 200px; height: 60px; }
+            .inline-block{ display: inline-block; width: 200px; height: 60px; }
+            .default-inline, .default-block{ width: 200px; height: 60px; }
+    </style>
+</head>
+<body>
+    <!-- 테스트 코드 출처 https://seungwoohong.tistory.com/23 -->
+    <div id="box-container">
+        <div class="none">none</div>
+        <div class="block1">block1</div>
+        <div class="block2">block2</div>
+        <span class="inline">inline</span>
+        <span class="inline-block">inline-block</span>
+        <span>defualt inline-block</span>
+        <br>
+        <span>default inline-block 안녕하세요 유진수입니다. span, tag, inline 에 대해서 테스트 중입니다. Lorem ipsum dolor sit amet consectetur.</span>
+        <div>block3</div>
+    </div>
+</body>
+</html>
