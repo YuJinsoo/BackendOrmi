@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ko-KR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CSS선택자 우선순위</title>
+    <style>
+      .royalblue {
+        color: green;
+      }
+      p {
+        color: green;
+        background-color: orange !important;
+      }
+      p {
+        background-color: yellow;
+        color: red;
+      }
+
+      p {
+        color: blue;
+      }
+
+      /*
+      태그선택자 : 이스트소프트 오르미학교
+      class : 특정 반(1반, 2반, 3반...)
+      id: 반번호 (23번)
+      inline: 학생 개인이 하고싶은대로 두발규정 하고다님. 즉 자기마음대로!
+      */
+    </style>
+  </head>
+  <body>
+    <p class="royalblue">안녕하세요</p>
+  </body>
+</html>

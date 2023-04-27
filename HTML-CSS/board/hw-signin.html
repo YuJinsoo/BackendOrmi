@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ko-KR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>회원가입</title>
+    <link rel="stylesheet" href="./css/style-signin.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>회원가입</h1>
+      <p>원활한 서비스 이용을 위해 회원가입을 해주세요</p>
+
+      <form method="post">
+        <div>
+          <label class="l-width" for="user-id">아이디</label>
+          <input type="text" id="user-id" name="userid" />
+        </div>
+        <div>
+          <label class="l-width" for="user-mail">이메일</label>
+          <input type="email" id="user-mail" name="usermail" />
+        </div>
+        <div>
+          <label class="l-width" for="user-pw">비밀번호</label>
+          <input type="password" id="user-pw" name="userpw" />
+        </div>
+        <div>
+          <label class="l-width" for="user-nick">닉네임</label>
+          <input type="text" id="user-nick" name="usernick" />
+        </div>
+
+        <fieldset class="gender-field">
+          <div class="gender-legend">
+            <legend>성별</legend>
+          </div>
+          <div class="gender-list">
+            <ul>
+              <li>
+                <input type="radio" id="gender-male" name="gender" /><label
+                  for="gender-male"
+                  >남성</label
+                >
+              </li>
+              <li>
+                <input type="radio" id="gender-female" name="gender" /><label
+                  for="gender-female"
+                  >여성</label
+                >
+              </li>
+              <li>
+                <input type="radio" id="gender-none" name="gender" /><label
+                  for="gender-none"
+                  >선택안함</label
+                >
+              </li>
+            </ul>
+          </div>
+        </fieldset>
+
+        <fieldset class="tech-field">
+          <div class="tech-legend">
+            <legend>사용기술</legend>
+          </div>
+          <div class="tech-list">
+            <ul>
+              <li>
+                <input type="checkbox" id="html" name="tech" /><label for="html"
+                  >HTML</label
+                >
+              </li>
+              <li>
+                <input type="checkbox" id="css" name="tech" /><label for="css"
+                  >CSS</label
+                >
+              </li>
+              <li>
+                <input type="checkbox" id="js" name="tech" /><label for="js"
+                  >JavaScript</label
+                >
+              </li>
+              <li>
+                <input type="checkbox" id="python" name="tech" /><label
+                  for="python"
+                  >Python</label
+                >
+              </li>
+              <li>
+                <input type="checkbox" id="django" name="tech" /><label
+                  for="django"
+                  >Django</label
+                >
+              </li>
+              <li>
+                <input type="checkbox" id="github" name="tech" /><label
+                  for="github"
+                  >GitHub</label
+                >
+              </li>
+              <li>
+                <input type="checkbox" id="sql" name="tech" /><label for="sql"
+                  >PostgreSQL</label
+                >
+              </li>
+            </ul>
+          </div>
+        </fieldset>
+        <button type="button" class="sub-button">회원가입</button>
+      </form>
+    </div>
+  </body>
+</html>

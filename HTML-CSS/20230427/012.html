@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ko-KR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>단위</title>
+    <style>
+      .div1 {
+        /*width: 1000px;*/
+        height: 400px;
+        width: 50%;
+        background-color: salmon;
+        font-size: 40px;
+      }
+      .div2 {
+        width: 50%;
+        height: 50%;
+        background-color: royalblue;
+        font-size: 2em; /*부모의 2배 글씨크기*/
+      }
+      .div3 {
+        font-size: 2rem; /*부모의 2배 글씨크기*/
+      }
+
+      .vw-hv {
+        background: green;
+        width: 50vw;
+        height: 50vh;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="div1">
+      1
+      <div class="div2">
+        2
+        <div class="div3">3</div>
+      </div>
+    </div>
+    <div class="vw-hv">vw/vh</div>
+  </body>
+</html>

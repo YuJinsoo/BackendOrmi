@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ko-KR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>table</title>
+  </head>
+  <body>
+    <table>
+      <caption>
+        내용설명. 필수요소 아님. table태그바로 아래에 위치해야 함
+      </caption>
+      <!-- tbody, thead는 코드 가독성때문에씀. 필수아님 -->
+      <colgroup>
+        <col width="200" style="background-color: goldenrod; border: 1px" />
+        <col />
+        <col />
+      </colgroup>
+      <thead>
+        <tr>
+          <th>구분</th>
+          <th colspan="2">제목/작성자</th>
+          <!-- <th>작성자</th> -->
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th rowspan="2">제목</th>
+          <td>공지사항입니다.</td>
+          <td>홍길동</td>
+        </tr>
+
+        <tr>
+          <td colspan="2">공지사항입니다.</td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
+</html>

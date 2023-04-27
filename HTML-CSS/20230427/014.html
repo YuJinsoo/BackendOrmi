@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko-KR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title></title>
+    <style>
+      .bg {
+        /*
+        background: url(./img/est.jpg);
+        background-color: yellow;
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-position: 50% 50%;
+        */
+        /*한번에 설정*/
+        /*
+        background: yellow url(./img/est.jpg) no-repeat 50% 50% / 50% 50%;
+        */
+        /* 그라데이션과 이미지를 동시에 주려면 중첩이기 때문에 ,로 줌 */
+        background: url(./img/est.jpg) no-repeat 50% 50% / 50% 50%,
+          linear-gradient(
+            126deg,
+            rgba(18, 255, 35, 1) 0%,
+            rgba(207, 240, 18, 1) 21%,
+            rgba(255, 0, 0, 1) 48%,
+            rgba(221, 12, 94, 1) 74%,
+            rgba(0, 212, 255, 1) 100%
+          );
+        width: 600px;
+        height: 400px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="bg">
+      Lorem ipsum dolor, sit amet consectetur adipisicing elit. Laborum fuga,
+      maxime tempore nisi repellat dolorem assumenda et, eligendi tempora
+      voluptatum fugit cupiditate dolorum delectus at iste sed quisquam, quod
+      architecto!
+    </div>
+  </body>
+</html>

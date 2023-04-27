@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ko-KR">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>select</title>
+</head>
+<body>
+    <label>오늘의 점심 메뉴</label>
+    <select >
+        <optgroup label="중국음식">
+            <option selected value="1">쟁반짜장</option>
+            <option>짬짜면</option>
+        </optgroup>
+        <optgroup label="뭘먹지?">
+            <option>간장계란밥</option>
+            <option selected>라면</option>
+            <option>김밥</option>
+        </optgroup>
+    </select>
+    <br>
+    <br>
+
+    <fieldset>
+        <legend>사용기술</legend>
+        <label><input type="checkbox">HTML</label>
+        <input type="checkbox" id="tech1"><label for="tech1">CSS</label>
+    </fieldset>
+
+    <fieldset>
+        <legend>나이</legend>
+        <!-- name을 같게 설정하면 그중에 1개만 설정하도록 변경됨. legend, fieldset 상관없음 -->
+        <label><input type="radio" name="age">10대</label>
+        <label><input type="radio" name="age">10대</label>
+        <label><input type="radio" name="age">10대</label>
+    </fieldset>
+    <br>
+    <label><input type="radio">10대</label>
+
+    <br>
+    <br>
+
+    <!-- 여러줄로 입력됨 -->
+    <textarea cols="50" rows="20" placeholder="텍스트를 입력해주세요"></textarea>
+    <br>
+    <!-- 한줄로만 입력됨 -->
+    <input type="text">
+
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko-KR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CSS 상속</title>
+    <style>
+      /*쉼표로 한꺼번에 할 수 있음*/
+      /*
+      h1,
+      h2,
+      p {
+        color: red;
+      }
+      */
+      div {
+        color: red;
+        border: 1px solid royalblue;
+      }
+      h1,
+      h2,
+      p {
+        border: inherit;
+      }
+      p {
+        border: initial;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <h1>Hello</h1>
+      <h2>hello</h2>
+      <p>paragraph hello</p>
+      <button type="button">Hello</button>
+      <!-- <h1 style="color: red">Hello</h1>
+      <h2 style="color: red">hello</h2>
+      <p style="color: red">paragraph hello</p> -->
+    </div>
+  </body>
+</html>
