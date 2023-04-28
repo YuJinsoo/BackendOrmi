@@ -1,13 +1,19 @@
 /*초기화작업*/
 body,
 h1,
-p {
+h2,
+h3,
+p,
+.field,
+ul {
   margin: 0;
+  padding: 0;
 }
 
 .container {
   width: 360px;
   margin: 40px auto;
+  font-size: 10px;
 }
 
 .title,
@@ -21,7 +27,7 @@ p {
   color: #888;
 }
 
-form > div {
+.login > div {
   margin-bottom: 10px;
   display: flex;
   align-items: center;
@@ -33,11 +39,16 @@ form > div {
 }
 
 [type="password"],
-[type="text"] {
+[type="text"],
+[type="email"] {
   width: 290px;
   height: 32px;
   border: 1px solid #ccc;
   border-radius: 4px;
+}
+
+[type="checkbox"]:checked + label {
+  font-weight: bold;
 }
 
 .submit-button {
@@ -54,4 +65,201 @@ form > div {
 .submit-button:active {
   border: 0;
   margin-top: 3px;
+}
+
+.submit-button:disabled {
+  background-color: #ccc;
+}
+
+/**/
+
+.field {
+  border: none;
+  margin: 10px 0;
+}
+
+.field ul {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 10px;
+}
+
+.field legend {
+  float: left;
+  width: 70px;
+}
+
+/*layout.html*/
+body {
+  /* min-width: 1000px; */
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main {
+  /* 남은 모든공간 포함 하도록 하는 트릭! */
+  flex-grow: 1;
+  width: 1000px;
+  margin: auto; /*가운데정렬인가?*/
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  height: 80px;
+  border-bottom: 1px solid #ddd;
+}
+
+.header-click a,
+.header-click button {
+  padding: 10px 15px;
+  color: black;
+  text-decoration: none;
+}
+
+.header-click button {
+  font-family: inherit;
+  font-size: inherit;
+  border: 0;
+  background: none;
+}
+
+.footer {
+  background-color: #eee;
+  text-align: center;
+  padding: 20px 0;
+}
+
+/*index.html*/
+
+.table {
+  border-spacing: 0;
+  border-top: 2px solid black;
+  border-bottom: 1px solid #ddd;
+  border-collapse: collapse; /*각 셀들의 border 중첩 허용*/
+
+  table-layout: fixed;
+  width: 1000px;
+}
+
+/* .table th,
+.table td{
+  border:1px solid #eee;
+} */
+
+.table th {
+  background-color: #eee;
+  border-bottom: 1px solid #ddd;
+  padding: 8px;
+}
+
+.table td {
+  padding: 10px;
+  border-top: 1px solid #ddd;
+}
+
+/* tabel클래스를 가지고 list클래스도 가진 것 것. */
+.table.list {
+  text-align: center;
+}
+
+.table a {
+  text-decoration: none;
+  font-weight: bold;
+  color: seagreen;
+  display: block;
+  text-align: left;
+  padding: 8px 0;
+
+  /* 말줄임 처리.. */
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.table a::after {
+  color: blueviolet;
+}
+
+/* main 내부 컨텐츠 */
+.main-title {
+  margin: 40px 0 10px;
+}
+.main-desc {
+  color: #777;
+  margin-bottom: 20px;
+}
+.main-desc strong {
+  color: royalblue;
+}
+
+.footer {
+  margin-top: 80px;
+}
+
+.btn {
+  /* 가운데 정렬 inline-block 방식.. */
+  /* display: inline-block;
+  text-align: center;
+  line-height: 32px; */
+  /* 가운데 정렬 flex 방식.. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: black;
+  background-color: #eee;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  width: 100px;
+  height: 32px;
+
+  text-decoration: none;
+  box-sizing: border-box;
+  font: inherit;
+}
+.btn-group {
+  margin: 20px;
+  text-align: right;
+}
+
+/* 게시글작성한 */
+
+.select {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  width: 200px;
+  height: 32px;
+  /* display: flex;
+  align-items: center; */
+}
+
+.post-title {
+  /* display: flex;
+  align-items: center; */
+  width: 100%;
+}
+
+/* .write textarea {
+  resize: none;
+} */
+.post {
+  resize: none;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  display: block;
+  width: 100%;
+  height: 400px;
+}
+.post-file {
+  display: flex;
+  align-items: center;
+}
+
+.tablefirstcol {
+  background-color: #eee;
+  font-weight: bold;
 }

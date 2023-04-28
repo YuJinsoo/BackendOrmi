@@ -1,0 +1,63 @@
+h3 {
+  margin-bottom: 10px;
+}
+
+th {
+  background-color: #eee;
+}
+
+.main-title,
+.table-div {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex-grow: 1;
+  margin: auto;
+  /* margin-left: 100px;
+  margin-right: 100px; */
+  min-width: 1000px;
+}
+
+table {
+  text-align: left;
+  border-spacing: 0;
+  border-top: 2px solid black;
+  border-bottom: 1px solid #ddd;
+  border-collapse: collapse; /*각 셀들의 border 중첩 허용*/
+}
+
+.post-title,
+.post-data {
+  margin: 10px 5px;
+}
+
+.post-data > label {
+  color: #777;
+  font-size: 0.8em;
+  border-right: 1px solid #777;
+  padding-right: 10px;
+}
+
+.post_data:not(:nth-last-child(0)) {
+  padding-left: 100px;
+}
+
+#lastdata {
+  border: 0px;
+}
+
+.post-content {
+  padding: 20px 10px;
+}
+
+.list-with,
+.list-curri {
+  padding-left: 20px;
+}
+
+.paragrap {
+  display: flex;
+  flex-direction: column;
+  row-gap: 5px;
+  margin-bottom: 30px;
+}
