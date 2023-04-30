@@ -15,7 +15,7 @@ th {
   margin: auto;
   /* margin-left: 100px;
   margin-right: 100px; */
-  min-width: 1000px;
+  /* min-width: 1000px; */
 }
 
 table {
@@ -24,6 +24,7 @@ table {
   border-top: 2px solid black;
   border-bottom: 1px solid #ddd;
   border-collapse: collapse; /*각 셀들의 border 중첩 허용*/
+  width: 100%;
 }
 
 .post-title,
