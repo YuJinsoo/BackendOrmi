@@ -135,7 +135,7 @@
      ```
    - 다른 자료형을 입력할 수 있습니다.
    - 키의 중복은 허락하지 않고, 값의 중복을 허락합니다.
-   - dict를 활용한 switch 만들기
+   - dict를 활용한 switch 만들기. >> match - case 구문으로 (switch) 가능
 
      ```python
      def switch(day):
