@@ -1,0 +1,514 @@
+<h1>Collections 모듈</h1>
+<h2>collections.defaultdict</h2>
+<ul>
+<li>dict 클래스의 subclass</li>
+<li>collections 라이브러리에 탑재되어 있는 defaultdict는 딕셔너리(dict)와 거의 똑같은 용법으로 사용할 수 있습니다.</li>
+<li>다른 점은 없는 키로 접근을 해도 KeyError를 일으키지 않고 초기 값(default value)를 내뱉는다는 데 있습니다.</li>
+<li>
+<p>초기값은 따로 설정할 수 있습니다.</p>
+</li>
+<li>
+<p>예제</p>
+</li>
+</ul>
+<p>```python
+from collections import defaultdict
+default_dict = defaultdict(int) # 초기값을 설정해줌
+print(type(default_dict))
+print(default_dict)         # defaultdict(<class 'int'>, {})</p>
+<h1>없는 키를 조회하면 원소가 추가됨</h1>
+<p>default_dict['key1']</p>
+<h1>int 클래스의 기본 값인 0이 자동으로 들어감</h1>
+<p>print(default_dict)        # defaultdict(<class 'int'>, {'key1': 0})</p>
+<h1>get함수는 조회만 하고 없는 키를 호출해도 생성되지는 않음</h1>
+<p>default_dict.get('hi')
+print(default_dict)         # defaultdict(<class 'int'>, {'key1': 0})</p>
+<p>default_dict['key2']
+print(default_dict)         # defaultdict(<class 'int'>, {'key1': 0, 'key2': 0})</p>
+<p>```</p>
+<ul>
+<li>활용방법</li>
+</ul>
+<p>```python</p>
+<h1>기본값으로 컨벤션 타입으로 지정할 수 있음</h1>
+<p>from collections import defaultdict
+ddict = defaultdict(list) # 초기값을 설정해줌
+print(ddict)    # defaultdict(<class 'list'>, {})</p>
+<h1>원소가 리스트이면 같은 key 값에 여러 value를 넣을 수 있게 된다.</h1>
+<p>l = [('A',123),('B', 45),('C', 6),('A',78),('B',9)]
+for k, v in l:
+    ddict[k].append(v)</p>
+<h1>없는 key더라도 에러발생하지 않고 생성해서 값을 넣어준다.</h1>
+<p>print(ddict)    # defaultdict(<class 'list'>, {'A': [123, 78], 'B': [45, 9], 'C': [6]})
+```</p>
+<ul>
+<li>to be continue...</li>
+</ul>
+<hr />
+<h1>itertools 모듈</h1>
+<ul>
+<li>itertools 모듈에는 반복 가능한 데이터 스트림을 처리하는 데 유용한 많은 함수와 제너레이터가 포함되어 있습니다.</li>
+</ul>
+<h2>itertools.chain()</h2>
+<blockquote>
+<p>함수 형태 : itertools.chain(*iterables)</p>
+</blockquote>
+<ul>
+<li>첫 번째 이터러러블 객체가 끝날 원소를 반환하고 다음 이터러블로 넘어감</li>
+<li>iterables의 모든 이터러블이 소진될 때까지 진행하는 이터레이터를 만듭니다</li>
+<li>
+<p>여러 시퀀스를 단일 시퀀스처럼 처리하는 데 사용됩니다.</p>
+</li>
+<li>
+<p>예제: 한 차원의 iterable만 함(2차원 배열의 경우 list채로 출력)</p>
+</li>
+</ul>
+<p>```python
+import itertools</p>
+<p>a = itertools.chain([1,2,3], ['AB'], 'hello@world!')</p>
+<p>for i in a:
+    print(i, end=' ')</p>
+<h1>1 2 3 AB h e l l o @ w o r l d !</h1>
+<p>print()
+aa = itertools.chain([1,2,[10,20,30]],"ABC",(10.2, 22.2))</p>
+<h1>1단계 iterable 까지만 그대로 출력함</h1>
+<p>for i in aa:
+    print(i, end=' ')</p>
+<h1>1 2 [10, 20, 30] A B C 10.2 22.2</h1>
+<p>```</p>
+<h1>functools 모듈</h1>
+<h1>json 모듈</h1>
+<ul>
+<li>JSON(JavaScript object Notation)은 텍스트를 사용하여 데이터를 저장하고 전송할 데이터 공유를 위한 개방형 표준 파일 형식입니다.</li>
+<li>JSON 데이터는 <strong>키/값 쌍</strong>으로 작성됩니다. 키와 값은 중간에 콜론(:)으로 구분되며 왼쪽에는 키, 오른쪽에는 값이 있습니다.</li>
+<li>
+<p>XMl에 비해 <strong>명확하고 읽기 쉽고</strong>, 데이터 셋을 정의하는 문자 수가 적어 인터넷을 통한 전송 <strong>오버헤드</strong>가 적습니다.</p>
+</li>
+<li>
+<p><code>{ }</code> 를 하나의 오브젝트로 인식해서 다룹니다.</p>
+</li>
+<li>
+<p>json 모듈은 JSON 파일을 읽고 쓰기 편리하게 지원하는 모듈입니다.</p>
+</li>
+<li>
+<p>인코더(json.JSONEncoder)와 디코더(json.JSONDecoder)</p>
+</li>
+<li>
+<p>NaN, Infinity 및 -Infinity를 해당 float 값으로 이해합니다.
+    |JSON|파이썬|
+    |------|----|
+    |오브젝트(object)|dict|
+    |배열(array)|list|
+    |문자열(string)|str|
+    |숫자(정수)|int|
+    |숫자(실수)|float|
+    |true|True|
+    |flase|False|
+    |null|None|</p>
+</li>
+<li>
+<p>https://docs.python.org/ko/3/library/json.html</p>
+</li>
+</ul>
+<h2>json.dump()</h2>
+<ul>
+<li>인자로 file object가 있어서 <code>str</code>로 변환해 파일에 쓰는 기능까지 포함</li>
+<li>json 파일에 입력할 데이터는 <code>dictionary</code> 타입으로 되어있어야 한다.</li>
+</ul>
+<p>```python</p>
+<h1>list형식, dict형식 모두 입력이 된다.</h1>
+<h1>왜냐하면 JSON 데이터와 Python 자료형이 1:1 매칭되고 그걸 josn 모듈에서 처리해주기 떄문</h1>
+<p>import json</p>
+<p>li = [
+    {
+        "_id": "645f63cdbfa868f6ba47ccd7",
+        "age": 40,
+        "eyeColor": "brown",
+        "name": "Frederick Pate",
+        "gender": "male"
+    },
+    {
+        "_id": "645f63cd9e3df96110aeec47",
+        "age": 31,
+        "eyeColor": "green",
+        "name": "Janis Guthrie",
+        "gender": "female"
+    },
+    {
+        "_id": "645f63cd033fb24f4534d349",
+        "age": 32,
+        "eyeColor": "brown",
+        "name": "Marla West",
+        "gender": "female"
+    }
+]</p>
+<p>d = {
+        "_id": "645f63cd033fb24f4534d349",
+        "age": 32,
+        "eyeColor": "brown",
+        "name": "Marla West",
+        "gender": "female"
+    }</p>
+<p>with open('dump_li.json', 'w', encoding='utf-8') as f:
+    # indent key argument에 int 혹은 문자로 들여쓰기 문자를 어떤 것으로 넣을지 설정할 수 있음
+    json.dump(li, f, indent='\t') # JSON 문자열로 변환과 동시에 파일에 입력이 됨</p>
+<p>with open('dump_d.json', 'w', encoding='utf-8') as f:
+    json.dump(d, f, indent=2)</p>
+<p>```</p>
+<h3>JSON에서 한글 출력하기</h3>
+<ul>
+<li>key argument : <code>ensure_ascii</code> 활용</li>
+<li>키 아규먼트 값을 <code>False</code>로 주면 아스키코드 값으로 문자를 표현하는 것을 보장하지 않으므로 문자 그대로 표현됨</li>
+<li>키 아규먼트 값을 <code>True</code>로 주면 모든 문자를 아스키코드 값표현하기 때문에 아스키 코드가 아닌 문자는 이스케이프 문자로 표현된다(디폴트)</li>
+</ul>
+<p>```python
+import json
+d = {'one': '하나', 'two': '둘', 'three': '셋'}</p>
+<p>with open('ensure_false.json', 'w', encoding='utf-8') as f:
+    json.dump(d,f,indent='\t', ensure_ascii=False)</p>
+<h2>ensure_false.json</h2>
+<h1>{</h1>
+<h1>"one": "하나",</h1>
+<h1>"two": "둘",</h1>
+<h1>"three": "셋"</h1>
+<h1>}</h1>
+<p>with open('ensure_true.json', 'w', encoding='utf-8') as f:
+    json.dump(d, f, indent='\t', ensure_ascii=True)</p>
+<h2>ensure_true.json</h2>
+<h1>{</h1>
+<h1>"one": "\ud558\ub098",</h1>
+<h1>"two": "\ub458",</h1>
+<h1>"three": "\uc14b"</h1>
+<h1>}</h1>
+<p>```</p>
+<h2>json.load()</h2>
+<ul>
+<li>JSON 파일을 열어 Python의 객체로 변환하는 함수</li>
+</ul>
+<p>```python</p>
+<h1>위에 있는 dump_d.json 파일을 오픈하는 예제</h1>
+<p>import json</p>
+<p>with open('dump_d.json') as f:
+    json_obj = json.load(f)</p>
+<p>print(json_obj)</p>
+<h1>{'_id': '645f63cd033fb24f4534d349', 'age': 32, 'eyeColor': 'brown', 'name': 'Marla West', 'gender': 'female'}</h1>
+<p>```</p>
+<h2>json.dumps()</h2>
+<blockquote>
+<p>json.dumps(py_object, name)</p>
+</blockquote>
+<ul>
+<li>Python 객체를 JSON 문자열로 변환하는 함수</li>
+<li>반환 값은 <code>str</code> 타입 문자열을 반환해줌</li>
+<li>
+<p>파일에 쓰는 기능은 없음</p>
+</li>
+<li>
+<p>json.dumps()는 JSON 문자열로 변환만 해주기 때문에 f.write로 직접 파일에 써 줘야 한다.</p>
+</li>
+</ul>
+<p>```python
+import json
+d = {
+        "_id": "645f63cd033fb24f4534d349",
+        "age": 32,
+        "eyeColor": "brown",
+        "name": "Marla West",
+        "gender": "female"
+    }</p>
+<p>with open('dumps.json', 'w', encoding='utf-8') as f:
+    json_str = json.dumps(li, indent='\t')
+    print(json_str)
+    f.write(json_str) # dumps는 JSON문자열로 변환만 하기 때문에 파일에 직접 써줘야 한다.</p>
+<p>```</p>
+<h2>json.loads()</h2>
+<ul>
+<li>JSON 문자열을 Python 객체로 변환하는 함수</li>
+</ul>
+<p>```python
+import json
+d = {
+        "age": 32,
+        "Region": {
+          "Contry" : "Korea,
+          "City" : "Seoul,
+          "Code" : 18490
+        },
+        "name": "Marla West",
+    }</p>
+<p>json_str = json.dumps(d, intdent = 4)
+print(json_str)
+print(type(json_str)) # <class 'str'></p>
+<p>py_obj = json.loads(json_str)
+print(type(py_obj)) # <class 'dict'> # python 객체 dict로 변환됨</p>
+<h2>출력</h2>
+<h1>{</h1>
+<h1>"age": 32,</h1>
+<h1>"Region": {</h1>
+<h1>"Country": "Korea",</h1>
+<h1>"City": "Seoul",</h1>
+<h1>"Code": 18490</h1>
+<h1>},</h1>
+<h1>"name": "Marla West"</h1>
+<h1>}</h1>
+<p>```</p>
+<h1>random 모듈</h1>
+<ul>
+<li>임의로 난수를 생성하는 모듈입니다.</li>
+<li>실제로 완벽한 난수는 아니지만 난수에 매우 가깝게 숫자를 생성해줍니다.</li>
+<li>난수를 생성하는 알고리즘은 여러 가지 방식이 있습니다</li>
+</ul>
+<h1>pprint 모듈</h1>
+<h1>os 모듈</h1>
+<ul>
+<li>파이썬 내장 모듈로 별도의 설치 없이 <code>import os</code>로 임포트 할 수 있습니다.</li>
+<li>파이썬을 이용해 파일을 복사하거나 디렉터리를 생성하고 특정 디렉터리 내의 파일 목록을 구하고자 할 때 <code>os 모듈</code>을 사용하면 됩니다.</li>
+</ul>
+<h2>os.getcwd()</h2>
+<ul>
+<li>현재 경로를 str 문자열로 반환</li>
+</ul>
+<p>```python
+import os</p>
+<p>s = os.getcwd()</p>
+<p>print(type(s))  # <class 'str'>
+print(s)        # C:\Users\ABO\Desktop\Study_Python
+```</p>
+<h2>os.listdir()</h2>
+<ul>
+<li>현재 경로에 있는 모든 파일 및 폴더를 str 문자열 요소를 가진 list로 반환</li>
+<li>파일은 확장자가 있고 폴더는 확장자가 없는 것으로 구분할 수 있음</li>
+</ul>
+<p>```python
+import os</p>
+<p>l = os.listdir()</p>
+<p>print(type(l)) # <class 'list'>
+print(l)  # ['.git', 'CodingTest', 'python_grammer', 'README.md']</p>
+<p>```</p>
+<h2>os.system()</h2>
+<blockquote>
+<p>os.system(커맨드명령어)</p>
+</blockquote>
+<ul>
+<li>커맨드명령어 (string) 를 수행하는 함수</li>
+</ul>
+<p>```python
+import os</p>
+<p>os.system('dir')</p>
+<h1>C 드라이브의 볼륨에는 이름이 없습니다.</h1>
+<h1>볼륨 일련 번호: F28A-138E</h1>
+<h1>C:\Users\ABO\Desktop\Study_Python 디렉터리</h1>
+<h1>2023-05-11  오후 04:40    <DIR>          .</h1>
+<h1>2023-05-11  오후 04:40    <DIR>          ..</h1>
+<h1>2023-05-09  오후 05:06    <DIR>          CodingTest</h1>
+<h1>2023-05-11  오후 04:40    <DIR>          python_grammer</h1>
+<h1>2023-05-09  오후 04:42                58 README.md</h1>
+<h1>1개 파일                  58 바이트</h1>
+<h1>4개 디렉터리  104,515,416,064 바이트 남음</h1>
+<h1>0</h1>
+<p>```</p>
+<h2>os.mkdir(), os.makedirs()</h2>
+<ul>
+<li><code>os.mkdir()</code>, <code>os.makedirs()</code>함수는 입력한 경로의 폴더를 생성해주는 함수입니다.</li>
+</ul>
+<blockquote>
+<p>os.mkdir(경로)</p>
+</blockquote>
+<ul>
+<li>입력한 경로의 폴더만 생성하는 함수.</li>
+<li>중간에 없는 경로가 입력되면 지정된 경로를 찾을 수 없다는 에러가 나오면서 실패한다.</li>
+</ul>
+<p>```python
+import os</p>
+<p>os.mkdir('test') # test 폴더를 생성
+os.mkdir('test2/test3') # 현재 경로에 test2 폴더가 없다면 에러 발생</p>
+<p>```</p>
+<blockquote>
+<p>os.makedirs(경로, exist_ok=True/False)</p>
+</blockquote>
+<ul>
+<li>최하위 경로까지 가는 경로에 폴더가 없다면 모든 폴더를 생성해줌</li>
+</ul>
+<p>```python
+import os</p>
+<p>os.makedirs('test2/test3/testtest') # test2, test3 폴더가 없어도 모두 생성
+os.makedirs('test2/test3/testtest') # 파일이 이미 있으므로 만들 수 없습니다: 'test2/test3/testtest' 라는 에러 발생
+os.makedirs('test2/test3/testtest', exist_ok=True) # 경로상에 파일이 이미 존재하고 있어도 에러를 뱉지 않는 옵션</p>
+<p>```</p>
+<h2>os.path 모듈</h2>
+<ul>
+<li><code>os</code> 모듈에 포함된 모듈로 파일 경로를 생성 및 수정하고 파일 정보를 쉽게 다룰 수 있게 하는 모듈입니다.</li>
+<li>
+<p><code>import os.path</code>로 임포트 할 수 있습니다.</p>
+</li>
+<li>
+<p>os.path.abspath() 함수</p>
+</li>
+</ul>
+<blockquote>
+<p>os.path.abspath(파일및폴더이름)</p>
+</blockquote>
+<ul>
+<li>문자열로 입력한 <code>파일및폴더이름</code>를 절대경로 문자열로 반환합니다.</li>
+</ul>
+<p>```python
+  import os.path</p>
+<p>s = os.path.abspath('Test.md')</p>
+<p>print(type(s))  # <class 'str'>
+  print(s)        # C:\Users\ABO\Desktop\Study_Python\Test.md
+  ```</p>
+<ul>
+<li>os.path.basename() 함수</li>
+</ul>
+<blockquote>
+<p>os.path.basename(절대경로)</p>
+</blockquote>
+<ul>
+<li>입력한 절대 경로에서 가장 마지막 폴더 혹은 파일명만 문자열로 반환합니다.</li>
+<li>절대경로를 입력할 때 백슬래시 개수에 유의해한다. (백슬래스 2개 혹은 raw-string 문자)</li>
+</ul>
+<p>```python
+import os.path</p>
+<p>s = os.path.basename(r'C:\Users\ABO\Desktop\Study_Python\Test.md')</p>
+<p>print(type(s))  # <class 'str'>
+print(s)        # Test.md</p>
+<p>```</p>
+<ul>
+<li>os.path.dirname() 함수</li>
+</ul>
+<blockquote>
+<p>os.path.dirname(경로)</p>
+</blockquote>
+<ul>
+<li>path의 파일/디렉토리 경로를 반환한다.</li>
+</ul>
+<p>```python
+  import os.path</p>
+<p>s = os.path.dirname(r'C:\Users\ABO\Desktop\Study_Python\Test.md')</p>
+<p>print(type(s))  # <class 'str'>
+  print(s)        # C:\Users\ABO\Desktop\Study_Python</p>
+<p>```</p>
+<ul>
+<li>폴더로 했을 때</li>
+</ul>
+<p>```python
+  import os.path</p>
+<p>s = os.path.dirname(r'C:\Users\ABO\Desktop\Study_Python')</p>
+<p>print(type(s))  # <class 'str'>
+  print(s)        # C:\Users\ABO\Desktop</p>
+<p>```</p>
+<ul>
+<li>os.path.exists() 함수</li>
+</ul>
+<blockquote>
+<p>os.path.dirname(경로)</p>
+</blockquote>
+<ul>
+<li>입력한 경로가 존새하면 <code>True</code>, 존재하지 않으면 <code>False</code>를 리턴한다</li>
+</ul>
+<p>```python
+import os.path</p>
+<p>print(os.path.exists(r'C:\Users\ABO\Desktop\Study_Python\Test.md')) ## 파일명은 입력해도 False
+print(os.path.exists(r'C:\Users\ABO\Desktop\Study_Python'))         ## 실제 있는 경로이면 True
+```</p>
+<h1>glob 모듈</h1>
+<ul>
+<li>파일 검색이 아주 용이한 모듈로 <code>*</code> 이나 <code>?</code> 문자로 파일명을 쉽게 필터링할 수 있다.</li>
+<li>정규표현식과 같이 사용이 안됩니다.</li>
+</ul>
+<h1>sys 모듈</h1>
+<ul>
+<li>인터프리터? 디버깅하는거 있던데...</li>
+</ul>
+<h1>pytz 모듈</h1>
+<ul>
+<li>세계 시간 기준으로 관리해주는 패키지</li>
+</ul>
+<h1>엑셀모듈 : xlsxwriter</h1>
+<ul>
+<li>openpyxl 등등이 있었음</li>
+</ul>
+<h1>크롤링 모듈 : beautifulsoup</h1>
+<blockquote>
+<p>임포트 형식 : <code>from bs4 import BeautifulSoup</code></p>
+</blockquote>
+<ul>
+<li><code>BeautifulSoup</code>은 HTML과 XML 문서를 파싱하는 라이브러리입니다.</li>
+<li>웹 크롤링을 할 때, HTML 문서에서 원하는 데이터를 추출하는 데 자주 사용됩니다.</li>
+<li>
+<p>str 타입의 html 데이터를 html 구조를 가진 데이터로 가공하는 것도 가능합니다.</p>
+</li>
+<li>
+<p><code>reausts</code> 모듈로 가져온 응답을 파싱해서 원하는 정보를 보여줄 수 있음</p>
+</li>
+<li>일반적으로 아래와 같이 원하는 url의 html파일을 요청받은 후 BeautifulSoup객체를 생성해 사용함</li>
+</ul>
+<p>```python
+import requests
+from bs4 import BeautifulSoup</p>
+<p>response = requests.get('http://www.paullab.co.kr/stock.html')</p>
+<p>response.encoding = 'utf-8'
+html = response.text</p>
+<p>soup = BeautifulSoup(html, 'html.parser')
+```</p>
+<ul>
+<li>교육 크롤링 페이지의 거래량 총합을 구하는 코드</li>
+</ul>
+<p>```python</p>
+<h1>advanced 과제 :</h1>
+<h1>제주코딩베이스캠프 연구원에 2019.09.24일 부터 2019.10.23일까지 거래된 거래총량을 구해주세요.</h1>
+<h1>https://paullab.co.kr/stock.html</h1>
+<h3>제출답안### &gt;&gt; 주석제거후 제출했음</h3>
+<p>import requests
+from bs4 import BeautifulSoup</p>
+<p>response = requests.get('http://www.paullab.co.kr/stock.html')</p>
+<p>response.encoding = 'utf-8'
+html = response.text</p>
+<p>soup = BeautifulSoup(html, 'html.parser')</p>
+<h1>print(type(soup)) # <class 'bs4.BeautifulSoup'></h1>
+<h1>테이블 이름을 미리 저장</h1>
+<p>table_title = soup.select_one('.main&gt;#제주코딩베이스캠프연구원').text</p>
+<h1>연구원 이 들어간 객체만 골라서 가져오기</h1>
+<p>data = soup.select('.main')</p>
+<p>lab_table = list(filter(lambda x: '연구원' in x.text, data))</p>
+<h1>print(lab_table)</h1>
+<h1>print(len(lab_table))</h1>
+<p>data_list = lab_table[0].select('table&gt;tbody&gt;tr&gt;td')</p>
+<h1>print(type(data_list[0]))   #<class 'bs4.element.Tag'></h1>
+<h1>print(dir(data_list[0]))</h1>
+<h1>len(data_list) # 140</h1>
+<p>total_trading_volume = 0</p>
+<h1>7번째 데이터마다 거래량</h1>
+<p>for i in range(6,len(data_list),7):
+    # print(data_list[i].text)
+    total_trading_volume += int(data_list[i].text.replace(',', ''))</p>
+<p>print(f'{table_title}의 기간동안 거래총량은 {total_trading_volume:,} 회 입니다.')</p>
+<p>```</p>
+<ul>
+<li>더 간단하게 풀이한 방법. 상태클래스를 사용하면 더 쉽게 활용할 수 있다.</li>
+</ul>
+<p>```python</p>
+<h1>advanced 과제 : 더 쉽게 풀기. td에 :nth-child(7) 으로 검색하면 7번째 데이터를 바로 읽어온다.</h1>
+<h1>제주코딩베이스캠프 연구원에 2019.09.24일 부터 2019.10.23일까지 거래된 거래총량을 구해주세요.</h1>
+<h1>https://paullab.co.kr/stock.html</h1>
+<h3>제출답안### &gt;&gt; 주석제거후 제출했음</h3>
+<p>import requests
+from bs4 import BeautifulSoup</p>
+<p>response = requests.get('http://www.paullab.co.kr/stock.html')</p>
+<p>response.encoding = 'utf-8'
+html = response.text</p>
+<p>soup = BeautifulSoup(html, 'html.parser')</p>
+<h1>테이블 이름을 미리 저장</h1>
+<p>table_title = soup.select_one('.main&gt;#제주코딩베이스캠프연구원').text</p>
+<h1>연구원 이 들어간 객체만 골라서 가져오기</h1>
+<p>data = soup.select('.main')
+lab_table = list(filter(lambda x: '연구원' in x.text, data))</p>
+<p>data_list = lab_table[0].select('table &gt; tbody &gt; tr &gt; td:nth-child(7)') # &gt; span은 있어도 되고 없어도 되네..
+data_list2 = [i.text.replace(',','') for i in data_list]</p>
+<p>total_trading_volume = sum(map(int, data_list2))</p>
+<p>print(f'{table_title}의 기간동안 거래총량은 {total_trading_volume:,} 회 입니다.')
+```</p>
+<h1>gc 모듈 : Garbage Collector 사용하기</h1>
+<ul>
+<li>https://wikidocs.net/13969</li>
+</ul>
