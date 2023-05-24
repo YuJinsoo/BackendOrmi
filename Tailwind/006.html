@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>tailwindcss</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body>
+    <!-- tailwind도 컬러나 픽셀단위로 커스터마이징해서 사용할 수 있습니다. -->
+    <!-- arbitrary_values -->
+    <div class="top-[117px]">
+      <!-- ... -->
+    </div>
+
+    <div class="top-[117px] lg:top-[344px]">
+      <!-- ... -->
+    </div>
+
+    <div class="bg-[#bada55] text-[22px] before:content-['Festivus']">
+      <!-- ... -->
+    </div>
+
+    <div class="bg-[url('/what_a_rush.png')]">
+      <!-- ... -->
+    </div>
+  </body>
+</html>

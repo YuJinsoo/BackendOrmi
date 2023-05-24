@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ko-KR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>string</title>
+  </head>
+  <body>
+    <script>
+      let txt = "hello world";
+      let test; // undefined 상태
+      txt + txt;
+      txt[0];
+      //txt[-1] // 안됩니다. undefined
+      //txt[2:5] // 안됩니다.
+      // https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/String
+      // String.prototype.func()는 인스턴스로 호출하는 함수
+
+      txt.length; // 문자열의 길이. python 에서 len(txt)
+
+      txt.indexOf("o"); //4
+      txt.search("o"); //4
+
+      // 없는 값도 -1 출력
+      txt.search("z"); //-1
+      txt.indexOf("z"); // -1
+
+      // search는 정규표현식이 가능합니다.
+      let regExp = /[ea]llo/g;
+      txt.search(regExp); //1
+      txt.indexOf(regExp); //-1
+
+      txt.slice(1, 5); //'ello'
+      txt.slice(1); // 'ello world'
+      txt.slice(0); // 'hello world'
+      //txt.slice(3,1) //작동하지 않습니다.
+
+      // substring(시작인덱스, 종료인덱스) : 시작인덱스부터 종료인덱스-1까지 반환합니다.
+      txt.substring(1, 3); // 'el' slice와 같음
+      txt.substring(3, 1); // 'el' 동작합니다. slice는 안함
+
+      txt.replace("world", "jeju"); //'hello jeju'
+      txt; // 'hello world' replace해도 원본 txt값이 바뀌진 않습니다.
+      // python과 달리 정규표현식이 replace 안에서 사용 가능합니다.
+
+      let txt2 = "paullab CEO leehojun! hello world hello world";
+      // replace는 한 번만 수정함...
+      txt2.replace("world", "jeju"); // 'paullab CEO leehojun! hello jeju hello world'
+
+      // 다 바꾸려면 정규표현식을 써야 합니다.
+      txt2.replace(/world/g, "jeju"); // 'paullab CEO leehojun! hello jeju hello jeju'
+
+      //replaceAll은 IE에서 지원하지 않습니다. 그래서 사용하기 어렵긴 하지만... 강사님은 그냥 사용하심.
+      txt2.replaceAll("world", "jeju"); // 'paullab CEO leehojun! hello jeju hello jeju'
+
+      txt2.toUpperCase(); // 'PAULLAB CEO LEEHOJUN! HELLO WORLD HELLO WORLD'
+      txt2.toLowerCase(); // 'paullab ceo leehojun! hello world hello world'
+
+      // split 정규표현식 가능합니다.
+      txt2.split(" "); // (7) ['paullab', 'CEO', 'leehojun!', 'hello', 'world', 'hello', 'world']
+      "010-5044-2903".split("-"); // (3) ['010', '5044', '2903']
+
+      //trim 공백제거
+      "        a b c        ".trim(); // 'a b c'
+    </script>
+  </body>
+</html>

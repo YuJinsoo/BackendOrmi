@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>tailwindcss</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body>
+    <!-- https://tailwindcss.com/docs/margin -->
+    <!-- https://tailwindcss.com/docs/padding -->
+    <!-- https://tailwindcss.com/docs/font-weight -->
+    <!-- https://tailwindcss.com/docs/text-color -->
+    <div class="text-base">hello world</div>
+    <div class="text-lg">hello world</div>
+    <div class="text-2xl">hello world</div>
+    <div class="text-5xl">hello world</div>
+
+    <div class="border border-gray-950 p-3">hello</div>
+    <div class="border border-gray-950 mt-2">hello</div>
+    <div class="border border-gray-950 mt-2 pl-2">hello</div>
+    <!-- p, pt, pr, pb, pl -->
+    <!-- m, mt, mr, mb, ml -->
+    <br />
+
+    <!-- x축과 y축, mx, my -->
+    <div class="border border-gray-950 p-3 my-2">hello</div>
+    <div class="border border-gray-950 p-3 my-2">hello</div>
+    <div class="border border-gray-950 p-3 my-2">hello</div>
+    <br />
+
+    <div class="space-y-2">
+      <div class="border border-gray-950 p-3">hello</div>
+      <div class="border border-gray-950 p-3">hello</div>
+      <div class="border border-gray-950 p-3">hello</div>
+    </div>
+
+    <br />
+    <!-- https://tailwindcss.com/docs/list-style-type -->
+    <div class="p-5">
+      <ul class="list-disc list-inside">
+        <!-- list-disc 로 점은 생기시만 패딩이 없어서 안보이기때문에 div에 padding을 넣어줌 -->
+        <!-- list-inside로 디스크 표시 위치랑 내용입력되는곳과 같은 레벨으로 설정할 수있음 -->
+        <li>
+          Lorem, ipsum dolor sit amet consectetur adipisicing elit. Voluptas,
+          amet laboriosam tenetur quisquam saepe, ea nostrum quam hic deleniti,
+          nemo vel facilis repellat aperiam quas officia iusto id accusantium
+          culpa. Explicabo error, omnis et a saepe, itaque aperiam quis, tenetur
+          voluptatibus excepturi assumenda ea quaerat magni delectus! Dolor cum
+          commodi temporibus accusamus similique debitis amet, exercitationem
+          itaque deleniti expedita dicta.
+        </li>
+        <li>hello</li>
+        <li>hello</li>
+        <li>hello</li>
+      </ul>
+    </div>
+
+    <div class="p-5">
+      <!-- 아래와 같이 ul태그인데 list-decimal을 사용하지 않도록 해주세요 -->
+      <ul class="list-decimal">
+        <li>hello</li>
+        <li>hello</li>
+        <li>hello</li>
+        <li>hello</li>
+      </ul>
+    </div>
+    <br />
+
+    <!-- rounded-full w24 -->
+    <!-- https://tailwindcss.com/docs/border-radius#rounded-corners -->
+    <div class="w-16 h-16 bg-red-200"></div>
+    <div class="w-16 h-16 bg-red-200 rounded"></div>
+    <div class="w-16 h-16 bg-red-200 rounded-2xl"></div>
+    <div class="w-16 h-16 bg-red-200 rounded-full"></div>
+    <div class="border-l-4">helloworld left border</div>
+    <!-- 이런 식으로 메뉴를 많이 만듦 -->
+    <div class="border-l-4 border-gray-500 pl-2">
+      helloworld left border menu
+    </div>
+
+    <!-- https://tailwindcss.com/docs/border-radius -->
+    <!-- https://tailwindcss.com/docs/border-width -->
+    <div class="border-t-4 border-gray-500">helloworld top border</div>
+    <div class="border-b-4 border-gray-500">helloworld bottom border</div>
+    <div class="border-r-4 border-gray-500">helloworld right border</div>
+
+    <!-- https://tailwindcss.com/docs/adding-custom-styles#using-arbitrary-values -->
+    <div class="text-[17px]">hello world</div>
+    <div class="mt-[17px]">hello world</div>
+    <div class="bg-[#4267B2] text-white">facebook</div>
+  </body>
+</html>

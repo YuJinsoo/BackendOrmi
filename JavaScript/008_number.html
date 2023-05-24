@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ko-KR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title></title>
+  </head>
+  <body>
+    <script>
+      let n1 = 10000;
+      let n2 = "10000";
+      let n3 = "100,000,000";
+      let n4 = 10.123123;
+
+      parseInt(n2); // 10000
+      parseInt(n3); // 100 변환할수있는곳까지만 나옴
+      parseInt(n1, 2); // 16 // 2진수로 n1을 읽어서 10진수로 반환해줌
+
+      n4.toFixed(3); // '10.123'
+      n4.toFixed(); // '10'
+
+      n1.toString(); // 주의해야 합니다!
+      // 10000.toString() // error! .을 소수점으로 인식합니다.
+
+      // Math //
+      Math.max([1, 2, 3, 4, 5]); // NaN 안됩니다.
+      Math.max(1, 2, 3, 4, 5); // 이렇게 전개해야 합니다.
+      Math.max(...[1, 2, 3, 4, 5]);
+      Math.min(...[1, 2, 3, 4, 5]);
+
+      // sum이 없어서 아래와 같이 구현해야 합니다. ㅠㅠ
+      // [1,2,3,4].reduce((a,b)=> a+b,0)
+
+      // round(반올림)
+      console.log(Math.round(4.7)); //5
+      console.log(Math.round(4.4)); //4
+      // ceil 올림 floor 내림
+
+      console.log(Math.random() * 1000); // Math.random()은 0이상 1미만
+      // math random 최솟값 지정
+      // (Math.random() * (최대값 - 최소값)) + 최소값
+
+      // JS에서 큰 숫자를 사용할 때에는 BigInt를 사용합니다.
+      // BigInt를 여러분 회사에서 사용하지 않을 수도 있습니다.(추가된지 2년 되었습니다.)
+      // The proposal belongs to ECMAScript 2020, which is the 11th edition
+      // console.log(Number.MAX_SAFE_INTEGER)  // 2^53 - 1
+      Number.MAX_SAFE_INTEGER; // 9007199254740991
+      BigInt(9007199254740991) + BigInt(5); //9007199254740996n
+    </script>
+  </body>
+</html>
