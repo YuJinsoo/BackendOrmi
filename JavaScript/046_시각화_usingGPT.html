@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>JSON 데이터 시각화</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <canvas id="myChart"></canvas>
+
+    <script>
+      // JSON 데이터
+      const jsonData = [
+        {
+          지역이름: "서울",
+          인구순위: 1,
+          인구: 9411,
+        },
+        {
+          지역이름: "부산",
+          인구순위: 2,
+          인구: 3299,
+        },
+        {
+          지역이름: "대구",
+          인구순위: 4,
+          인구: 2363,
+        },
+        {
+          지역이름: "인천",
+          인구순위: 3,
+          인구: 2961,
+        },
+        {
+          지역이름: "광주",
+          인구순위: 5,
+          인구: 1463,
+        },
+      ];
+
+      // 라벨과 데이터 배열 초기화
+      const labels = [];
+      const data = [];
+      const ranks = [];
+
+      // JSON 데이터를 기반으로 라벨과 데이터 배열 생성
+      for (let i = 0; i < jsonData.length; i++) {
+        labels.push(jsonData[i]["지역이름"]);
+        data.push(jsonData[i]["인구"]);
+        ranks.push(jsonData[i]["인구순위"]);
+      }
+
+      // 차트 생성
+      const ctx = document.getElementById("myChart").getContext("2d");
+      const myChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: "지역 인구",
+              data: data,
+              backgroundColor: "rgba(54, 162, 235, 0.5)", // 막대 색상
+              borderColor: "rgba(54, 162, 235, 1)", // 막대 테두리 색상
+              borderWidth: 1, // 막대 테두리 두께
+            },
+          ],
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true,
+            },
+          },
+          plugins: {
+            title: {
+              display: true,
+              text: "지역 인구 및 순위",
+            },
+          },
+          tooltips: {
+            callbacks: {
+              label: function (context) {
+                let label = context.dataset.label || "";
+
+                if (label) {
+                  label += ": ";
+                }
+
+                label +=
+                  context.parsed.y +
+                  " 명 (순위: " +
+                  ranks[context.dataIndex] +
+                  ")";
+                return label;
+              },
+            },
+          },
+        },
+      });
+    </script>
+  </body>
+</html>
