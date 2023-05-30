@@ -1,0 +1,28 @@
+<html>
+<head>
+    <title>pyscript tutorial</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+</head>
+<body>
+    <py-script>
+        # python 변수, 함수 또한 javascript로 불러와서 사용할 수 있습니다.
+        name = 'hojun'
+        def addTwoNumbers(x, y):
+            return x + y
+    </py-script>
+    <script>
+        window.onload = function(){
+            console.log(pyscript.interpreter)
+        }
+        // 아래 코드를 console에서 실행해보세요.
+        // pyscript.interpreter
+        // pyscript.interpreter.globals
+        // pyscript.interpreter.globals.get('name')
+        // pyscript.interpreter.globals.get('addTwoNumbers')
+        // hello = pyscript.interpreter.globals.get('addTwoNumbers')
+        // hello(20, 30)
+    </script>
+</body>
+</html>

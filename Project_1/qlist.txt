@@ -1,0 +1,10 @@
+* 대한민국에서 유망항 it 직종을 말해줘. 기업명도 알려줘.
+* 나는 지금 IT '프론트엔드'개발자로 취업을 할거야. github URL은 'https://github.com/YuJinsoo?tab=repositories'이야. 자격증은 '~~~'rk dlTdj.
+ => 자동으로 이력서 만들어주는 서비스 만들 수 있겠죠?
+ => '프론트엔드', 'https://github.com/YuJinsoo?tab=repositories'정보는 버튼식이나, form 에서 간단하게 입력하고 넘어갈 수 있도록 만들면 좋습니다.
+
+* 여행 계획 채팅 봇
+ => 지역 선택
+ => 일정 선택
+ => 차 렌트 여부
+ 

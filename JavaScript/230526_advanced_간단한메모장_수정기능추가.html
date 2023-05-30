@@ -41,6 +41,7 @@
   <body>
     <main>
       <section>
+        <h1 id="status"></h1>
         <input type="text" name="" id="title" />
         <textarea name="" id="content" cols="30" rows="10"></textarea>
         <button onclick="saveNote()">메모</button>
@@ -56,10 +57,24 @@
         const title = document.getElementById("title").value;
         const content = document.getElementById("content").value;
 
-        allMemo.push({ title, content, len: allMemo.length });
+        let h = document.querySelector("#status");
+        if (h.innerText === "") {
+          allMemo.push({ title, content, len: allMemo.length });
+          console.log(allMemo);
 
-        localStorage.setItem("allMemo", JSON.stringify(allMemo));
-        render();
+          localStorage.setItem("allMemo", JSON.stringify(allMemo));
+          render();
+        } else if (h.innerText !== "") {
+          let idx = parseInt(h.innerHTML[0]) - 1;
+          console.log(idx);
+          let mem = { title, content, len: idx };
+
+          allMemo[idx] = mem;
+          console.log(allMemo);
+          localStorage.setItem("allMemo", JSON.stringify(allMemo));
+          h.innerHTML = "";
+          render();
+        }
       }
 
       function render() {
@@ -76,6 +91,7 @@
           const saveContent = document.createElement("p");
           const saveId = document.createElement("p");
           const deleteMemoBtn = document.createElement("button");
+          const modfyMemoBtn = document.createElement("button");
 
           saveTitle.textContent = item.title;
           saveContent.textContent = item.content;
@@ -83,10 +99,14 @@
           deleteMemoBtn.textContent = "삭제";
           deleteMemoBtn.setAttribute("id", item.len);
           deleteMemoBtn.setAttribute("onclick", "remove()");
+          modfyMemoBtn.textContent = "수정";
+          modfyMemoBtn.setAttribute("id", item.len);
+          modfyMemoBtn.setAttribute("onclick", "modify()");
 
           display.appendChild(saveId);
           display.appendChild(saveTitle);
           display.appendChild(saveContent);
+          display.appendChild(modfyMemoBtn);
           display.appendChild(deleteMemoBtn);
         }
       }
@@ -103,6 +123,21 @@
         }
         localStorage.setItem("allMemo", JSON.stringify(allMemo));
         render();
+      }
+
+      function modify() {
+        console.log(event.srcElement.id);
+        console.log(allMemo);
+        const memo = allMemo.find((item) => item.len == event.srcElement.id);
+        console.log(memo);
+        if (memo) {
+          let idx = allMemo.findIndex((item) => item == memo);
+
+          document.querySelector("#status").innerText =
+            idx + 1 + "번 게시물이 수정중 입니다.";
+          document.querySelector("#title").value = memo.title;
+          document.querySelector("#content").value = memo.content;
+        }
       }
     </script>
   </body>
