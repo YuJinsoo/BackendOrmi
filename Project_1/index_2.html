@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko-KR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title></title>
+  </head>
+  <body>
+    <!-- GET 방식은 URL로 key-value를 전달합니다. -->
+    <!-- <form action="./index_2.html" method="get">
+      <input name="id" type="text" />
+      <input name="pw" type="text" />
+      <button type="submit">로그인</button>
+    </form> -->
+    <script>
+      let url = `https://estsoft-openai-api.jejucodingcamp.workers.dev/`;
+
+      let data = [
+        {
+          role: "system",
+          content: "assistant는 소크라테스이다. 말 끝에는 '냥'으로 끝난다",
+        },
+      ];
+
+      data.push({
+        role: "user",
+        contents: "제주 3박 4일 일정을 짜줘",
+      });
+
+      fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+        redirect: "follow",
+      })
+        .then((res) => res.json)
+        .then((res) => {
+          console.log(res);
+          console.log(res.choices[0].message.content);
+        });
+    </script>
+  </body>
+</html>
