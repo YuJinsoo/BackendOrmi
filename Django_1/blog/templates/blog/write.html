@@ -1,0 +1,11 @@
+{% extends 'blog/base.html' %}
+<!--  -->
+{% block content %}
+<h1>블로그 글 작성 화면</h1>
+<form action="" method="post">
+  {% csrf_token %}
+  <!-- django 에서 보안 때문에 form을 막아둠 -->
+  <!-- csrf_token을 추가하면 허락하 요청이라는 뜻. 승인해줌 -->
+  <input type="text" />
+</form>
+{% endblock %}
