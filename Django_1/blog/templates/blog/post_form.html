@@ -1,0 +1,15 @@
+{% extends 'blog/base.html' %}
+<!--  -->
+{% block content %}
+<p>블로그 글 작성 화면</p>
+<!-- 제목 -->
+<!-- 내용 -->
+<form action="{% url 'blog:write' %}" method="post">
+  {% csrf_token %}
+  <!-- django 에서 보안 때문에 form을 막아둠 -->
+  <!-- csrf_token을 추가하면 허락하 요청이라는 뜻. 승인해줌 -->
+  <!-- form의 요소를 각각 p tag로 쓰겠다-->
+  {{ form.as_p }}
+  <input type="submit" class="btn btn-outline-success">
+</form>
+{% endblock %}

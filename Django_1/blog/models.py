@@ -9,6 +9,9 @@ class Post(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     # 생성, 수정, 저장될 때의 날짜/시간을 저장함
     updated_at = models.DateTimeField(auto_now=True)
+    
+    # def __str__(self):
+    #     return f'{self.pk}.{self.title}'
 
 
 class Comment(models.Model):

@@ -1,21 +1,30 @@
 from django.urls import path
 from . import views
 
+app_name = 'blog'
 
 urlpatterns = [
     # path(패턴, 매핑)
-    # 패턴에 아무것도 빈 str이면 index페이지를 의미합니다.
+    # 패턴에 빈 str이면 index페이지를 의미합니다.
     # path("", views.index) # FBV 방식
-    # 글 조회
+    
+    # 글 목록조회
+    # CBV 방식
+    # path("", Index.as_view()),  ## 이렇게 하려면 # from blog.views import Index #해줘야함
+    # path("", views.Index.as_view(), name='list'),
+    path("", views.List.as_view(), name='list'),
+    
+    # 글 상세 조회
+    path("detail/<int:pk>/", views.Detail.as_view(), name='detail'), #/blog/detail/1
+    
     # 글 작성
+    # path("write/", views.write, name='write'),
+    path("write/", views.Write.as_view(), name='write'),
+    
+    
     # 글 수정
     # 글 삭제
     # 코멘트 작성
     # 코멘트 삭제
-    
-    # CBV 방식
-    # path("", Index.as_view()), 
-    ## 이렇게 하려면 # from blog.views import Index #해줘야함
-    path("", views.Index.as_view()),
     
 ]
