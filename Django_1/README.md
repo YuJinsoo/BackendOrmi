@@ -19,6 +19,24 @@
 
 - 장고는 여러개의 `app`을 가질 수 있는 구조로 설계되어있습니다.
 
+## Django 동작과정
+1. WSGI Application 생성
+2. settings에서 정의한 settings.MIDDLEWARE 로드
+3. WSGI(uwsgi, gunicorn)에서 applcation call
+4. WSGI environ(request data를 담은 딕셔너리)과 함께 WSGIRequest 인스턴스 생성
+5. 미들웨어 체인에 WSGIRequest 인스턴스와 함께 call
+6. 미들웨어를 모두 거쳐간 후 최종적으로 view에 request가 전달되어 개발자가 정의한 로직을 거친 후 최종적으로 Response 반환
+
+- 출처: https://wookkl.tistory.com/60
+
+- django.core.wsgi.py의 get_wsgi_application()는 WSGIHandler()가 반환됨
+- 이때 setting.py에 정의한 미들웨어를 로드합니다.
+WSGI가 해당 applicationd을 call 하면 __call__메서드가 실행됩니다.
+(WSGIHandler는 django.core.handlers.wsgi 에 정의되어있습니다.)
+
+- middleware_chain 메서드에 request 객체르 넘겨주고 stack 구조인 middleware는 순서에 따라 각각 처리된 수 responst가 반환됩니다.
+- 미들웨어는 load_middleware(self, is_async=False) 함수에서 차례대로 로드됩니다.
+
 
 ## setting.py 설정
 
@@ -83,7 +101,7 @@
 2. 별칭
 - 개발 단계에서 URL을 리팩토링 하는 경우가 빈번하게 발생하는데, 별칭을 사용하면 URL 변경시 모든 파일을 찾아가며 수정해야 하는 일을 줄일 수 있습니다. 즉 **유지보수 측면에서 월등**합니다.
 
-- 별칭을 사용하기 위해서는 urls.py파일에 앱 별칭(별칭 namespace)과 `urlpattersn` 요소마다 `name` 속성에 별칭으로 쓸 str를 할당하면 됩니다.
+- 별칭을 사용하기 위해서는 urls.py파일에 앱 별칭(별칭 namespace)과 `urlpatterns` 요소마다 `name` 속성에 별칭으로 쓸 str를 할당하면 됩니다.
 
 ```python
 # blog.urls.py
@@ -134,7 +152,8 @@ class Write(CreateView):
 {% endfor %}
 ```
 
-## views : 요청에 따른 응답을 정리해두는 부분
+## View
+- 요청에 따른 응답을 정리해두는 부분
 - 웹 요청을 받는다
 - 요청을 처리하고 데이터베이스에서 필요한 값이 있으면 가져온다.
 - 가져온 값을 가공해서 응답 형태로 만들어준다.
@@ -149,6 +168,70 @@ class Write(CreateView):
 - `render()`도 리턴값은 httpresponse 입니다. httpresponse와 다른 점은 html이나 데이터베이스 정보를 같이 넘겨줄 수 있음
 
 - View 수정하면 urls.py, template 확인해야함
+
+### View를 정의하는 방법
+
+-view를 표현하는 방법은 다양하게 준비되어있고, generic view 는 자주 사용하는 기능들을 편리하게 사용하도록 만들어 둔 기능입니다. 그래서 일반 View를 상속해서 사용하는 것 보다 생략된 부분이 많아 처음 사용하면 동작을 이해하기 어려운 경우가 있습니다.
+
+- generic view를 제외하고, 요청을 처리하는 함수들의 첫 인자는 `request`로 지정합니다.
+
+
+1. 함수형
+- urls.py 에 매핑할 함수를 정의합니다. urls.py에서는 함수 이름만 전달합니다. () 는 생략
+
+- HTTP 메서드는 인자로 전달받은 request를 통해 구분합니다.
+
+```python
+def index(request):
+  if request.method == "GET":
+    pass
+
+  if request.method == "POST":
+    pass
+```
+
+- return 되어야 하는 값은 `HttpResponse()`인데, `render()`, `redirect()`등의 메서드와 `HttpResponse()`메서드가 가능합니다.
+
+```python
+from django.shortcuts import render, redirect
+from django.http import HttpResponse
+from django.urls import reverse_lazy, reverse
+```
+
+- 예외적으로 반환값이 HttpResponse()는 아니지만 별칭을 통해 경로를 전달할 수 있는 `reverse()` 사용 가능합니다.
+
+
+2. 클래스형
+
+- urls.py 에 매핑할 클래스를 정의합니다. urls.py에서는 클래스이름.as_view() 를 전달합니다.
+
+- HTTP 메서드는 클래스의 메서드 이름으로 구분합니다.
+
+```python
+from django.views import View
+
+class Index(View):
+    def get(self, request, *args, **kwargs):
+        pass
+    def post(self, request, **kwargs):
+        pass
+```
+
+3. 클래스형 - genericView
+
+- 매우 축약된 형태의 뷰 구현으로 다양한 클래스들이 개발되어 있습니다.
+
+- 클래스에 미리 정해진 변수이름에 값을 설정하여 손쉽게 원하는 기능을 개발할 수 있습니다.
+
+```python
+from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView #generic view
+
+class PostList(ListView):
+    model = Post
+    ...
+    pass
+```
+
 
 ## 도메인 주소만 요청했을 때 index 페이지 보여주기
 
@@ -219,3 +302,75 @@ from django.views.generic import ListView, CreateView, DetailView
   
 - 서버사이드 렌더링은 서버에 부하를 줄 수 있음
 - 하지만 seo측면에서 이미 완성된 페이지 이기 때문에 유리하다 (검색노출)
+
+
+## forms.py
+
+- 폼 형태를 지정해서 Database에 값을 손쉽게 전달할 수 있게 만들어줍니다.
+- 뷰 레이어(views.py) 에서 정의해둔 form의 인스턴스를 생성해서 입력에 대한 유효성 검사를 하기 위해 사용합니다.
+
+- 일반 form 과 modelform이 있습니다.
+
+
+1. 일반 form
+  - HTML 에 있는 form 태그를 가리킵니다.
+
+2. ModelForm
+  - models.py에 정의한 클래스(DB테이블)을 이용해서 form을 정의합니다.
+
+```python
+# blog/forms.py
+from django import forms
+from .models import Post, Comment
+
+## 장고의 form을 사용하는 것은 사용자 입력에 대한 유효성 검사를 위해 사용합니다.
+## 유효성 검사를 하는 이유는 sql injection, 데이터베이스와 일치하는 데이터인지 검사
+class PostForm(forms.ModelForm):
+    
+    class Meta:
+        model = Post
+        fields = ['title', 'content']
+
+
+class CommentForm(forms.ModelForm):
+    
+    class Meta:
+        model = Comment
+        fields = ['content']
+        
+```
+
+- views.py에서..
+
+```python
+# 뷰 단에서는 이렇게 사용합니다.
+
+def write(request):
+    if request.method == "POST":
+        form = PostForm(request.POST) #form 확인
+        if form.is_valid(): #form 유효성 확인
+            post= form.save()
+            return redirect('blog:list')
+        
+    form = PostForm() # 폼 생성
+    ## 렌더링할 템플릿에 Dictionary로 form을 전달함
+    return render(request, 'blog/post_form.html', {'form': form}) #생성한 form이 렌더링됨
+```
+
+- templates 파일
+
+```html
+{% extends 'blog/base.html' %}
+{% block content %}
+<p>블로그 글 작성 화면</p>
+<form action="{% url 'blog:write' %}" method="post">
+  <!-- django 에서 보안 때문에 form을 막아둠 -->
+  <!-- csrf_token을 추가하면 허락하 요청이라는 뜻. 승인해줌 -->
+  {% csrf_token %}
+  <!-- form의 요소를 각각 p tag로 쓰겠다-->
+  {{ form.as_p }}
+  <input type="submit">
+</form>
+{% endblock %}
+
+```

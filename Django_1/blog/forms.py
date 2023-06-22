@@ -1,9 +1,9 @@
 # blog/forms.py
 from django import forms
-from .models import Post
+from .models import Post, Comment
 
 # Form : tuple
-# 일반 form 에 있는 form 태그
+# 일반 form. html에 있는 form 태그
 
 # Model Form :  list
 # models를 사용하는 form
@@ -16,3 +16,11 @@ class PostForm(forms.ModelForm):
     class Meta:
         model = Post
         fields = ['title', 'content']
+
+
+class CommentForm(forms.ModelForm):
+    
+    class Meta:
+        model = Comment
+        fields = ['content']
+        

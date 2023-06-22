@@ -5,4 +5,17 @@
 <p>내용: {{ post.content }}</p>
 <p>작성자: {{ post.writer }}</p>
 <p>작성일: {{ post.created_at }}</p>
+<p>수정일: {{ post.updated_at }}</p>
+<a href="{% url 'blog:edit' pk=post.pk%}" class="btn btn-primary">수정</a>
+
+<form action="{% url 'blog:delete' pk=post.pk%}" method="post">
+    {% csrf_token %}
+    <input type="submit" value="삭제" class="btn btn-primary">
+</form>
+
+{% if comments %}
+<p>{{ comments }}</p>
+{% else %}
+<p>작성된 댓글이 없습니다.</p>
+{% endif %}
 {% endblock %}
