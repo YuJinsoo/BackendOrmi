@@ -5,8 +5,8 @@ from django.views import View
 from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView #generic view
 from django.urls import reverse_lazy, reverse
 
-from .models import Post, Comment
-from .forms import PostForm, CommentForm
+from .models import Post, Comment, HashTag
+from .forms import PostForm, CommentForm, HashTagForm
 
 # Create your views here.
 
@@ -21,37 +21,37 @@ from .forms import PostForm, CommentForm
 #     return HttpResponse('No!!!')
 
 ## 클래스형
-class Index(View):
-    def get(self, request):
-        # return HttpResponse('Indext page GET class')
+# class Index(View):
+#     def get(self, request):
+#         # return HttpResponse('Indext page GET class')
         
-        # 데이터베이스에 접근해서 값을 가져와야 합니다.
-        # 게시판에 글들을 보여줘야 하기 때문에 데이터베이스에서 "값 조회"
-        # MyModel.objects.all()
-        post_objs = Post.objects.all()
-        # context = DB에서 가져온 값
-        context = {
-            "posts": post_objs,
-        }
-        # print(post_objs) # Query_Set<1 ,2, 3, 4, 5>
-        return render(request, 'blog/board.html', context)
+#         # 데이터베이스에 접근해서 값을 가져와야 합니다.
+#         # 게시판에 글들을 보여줘야 하기 때문에 데이터베이스에서 "값 조회"
+#         # MyModel.objects.all()
+#         post_objs = Post.objects.all()
+#         # context = DB에서 가져온 값
+#         context = {
+#             "posts": post_objs,
+#         }
+#         # print(post_objs) # Query_Set<1 ,2, 3, 4, 5>
+#         return render(request, 'blog/post_list.html', context)
     
 
-# write
-# post - form
-# 글 작성 화면 및 글 작성 요청 FBV
-def write(request):
-    if request.method == "POST":
-        #form 확인
-        form = PostForm(request.POST)
-        if form.is_valid():
-            post= form.save()
-            # 값 전달 없이 url만 바뀔 때 redirect 씀
-            # return redirect('/blog')
-            return redirect('blog:list')
+# # write
+# # post - form
+# # 글 작성 화면 및 글 작성 요청 FBV
+# def write(request):
+#     if request.method == "POST":
+#         #form 확인
+#         form = PostForm(request.POST)
+#         if form.is_valid():
+#             post= form.save()
+#             # 값 전달 없이 url만 바뀔 때 redirect 씀
+#             # return redirect('/blog')
+#             return redirect('blog:list')
         
-    form = PostForm() # 빈 폼 생성
-    return render(request, 'blog/post_form.html', {'form': form}) #생성한 form이 렌더링됨
+#     form = PostForm() # 폼 생성
+#     return render(request, 'blog/post_form.html', {'form': form}) #생성한 form이 렌더링됨
 
 
 # Django 자체의 뷰 기능도 강력, 편리 (generic View)
@@ -86,11 +86,20 @@ class DetailView(View):
         # 해당 글 가져오기
         post = Post.objects.get(pk=post_id)
         # 이 글에 해당하는 댓글 가졍괴
-        comments = Comment.objects.all()
-        print(type(request))
+        comments = Comment.objects.filter(post=post)
+        # comment 생성할 Form
+        comment_form = CommentForm()
+        # 해쉬태그
+        hashtags = HashTag.objects.filter(post=post)
+        # 해쉬태그 Form
+        hashtag_form = HashTagForm()
+        
         context = {
             'post' : post,
             'comments' : comments,
+            'hashtags' : hashtags,
+            'comment_form' : comment_form,
+            'hashtag_form': hashtag_form
         }
         return render(request, 'blog/post_detail.html', context)
 
@@ -98,7 +107,7 @@ class Update(UpdateView):
     model = Post
     template_name = 'blog/post_edit.html'
     fields = ['title', 'content'] # Post 객체의 수정할 필드
-    # success_url = reverse_lazy('blog:list')
+    # success_url = reverse_lazy('blog:list') # 포스트 요청에 대한 성공
     
     # initial 기능 : 업데이트시 form안에 초기값(원래 있던 값)을 템플릿에 전달하는 기능
     def get_initial(self) -> Dict[str, Any]:
@@ -108,6 +117,7 @@ class Update(UpdateView):
         initial['content'] = post.content
         return initial
     
+    # post 요청 성공 시 수행할 메서드
     def get_success_url(self): 
         post = self.get_object()
         # 함수에서 사용하므로 reverse() 사용
@@ -137,7 +147,38 @@ class CommentWrite(View):
             # 이걸 왜하나? 댓글 객체를 생성하기 위해서
             content = form.cleaned_data['content']
             post = Post.objects.get(pk=post_id)
-            # 댓글객체 생성. db에 접근해서 create()로 할 경우 .save()를 안해줘도 됩니다.
-            # 크래스로 생성할 경우에는 생성된 instance에 .save()를 해줘야 합니다.
+            
+            # 댓글객체 생성. db에 접근해서 create()로 할 경우 .save()를 안해도 됨
+            # 크래스로 생성할 경우에는 생성된 instance에 .save()를 해줘야 함
             comment = Comment.objects.create(post=post, content=content)
-            return redirect('blog:detail', pk=post_id)
+            return redirect('blog:detail', post_id=post_id)
+
+
+class CommentDelete(View):
+    def post(self, request, pk):
+        comment = Comment.objects.get(pk=pk)
+        ## 상세 페이지로 돌아가기 위한 post id 접근 (삭제하기 전에 해야됨)
+        post_id = comment.post.id
+        # 코멘트 삭제
+        comment.delete()
+        return redirect('blog:detail', post_id=post_id)
+
+
+### HashTag
+class HashTagWrite(View):
+    def post(self, request, post_id):
+        form = HashTagForm(request.POST)
+        if form.is_valid():
+            name = form.cleaned_data['name']
+            #post
+            post = Post.objects.get(pk=post_id)
+            hashtag = HashTag.objects.create(post=post, name=name)
+            return redirect('blog:detail', post_id=post_id)
+        
+            
+class HashTagDelete(View):
+    def post(self, request, tag_id):
+        hashtag = HashTag.objects.get(pk=tag_id)
+        post_id = hashtag.post.id
+        hashtag.delete()
+        return redirect('blog:detail', post_id=post_id)

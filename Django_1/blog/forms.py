@@ -1,6 +1,6 @@
 # blog/forms.py
 from django import forms
-from .models import Post, Comment
+from .models import Post, Comment, HashTag
 
 # Form : tuple
 # 일반 form. html에 있는 form 태그
@@ -23,4 +23,13 @@ class CommentForm(forms.ModelForm):
     class Meta:
         model = Comment
         fields = ['content']
-        
+        widgets = {
+            'content': forms.Textarea(attrs={'rows':'2', 'cols':'40'})
+        }
+
+
+class HashTagForm(forms.ModelForm):
+    
+    class Meta:
+        model = HashTag
+        fields = ['name']

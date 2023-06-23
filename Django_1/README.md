@@ -71,7 +71,7 @@ WSGI가 해당 applicationd을 call 하면 __call__메서드가 실행됩니다.
 
 ## 장고 개발 순서
 
-> 기능정리 - model (데이터베이스) - URL - View 
+> 기능정리 - model (데이터베이스) - URL - View / Form - template
 
 - 데이터베이스를 먼저 하는 이유 : view에서 template를 만들어서 내보낼 때 model이 잘 안되어있으면 template가 계속 수정되어야 할수있음
 
@@ -80,17 +80,99 @@ WSGI가 해당 applicationd을 call 하면 __call__메서드가 실행됩니다.
 - migrations에 저장된 데이터베이스 상태로 되돌릴 수 있다.( 장고의 강력한 장점 중 하나)
 - python manage.py migrate (특정시점) : 특정시점의 데이터베이스로 이동함
 
+> view.py를 수정하면 반드시 urls.py 와 템플릿 파일을 확인해줍니다!
+> 변경되는 즉시 변경된 것을 적용해주어야 에러가 발생하지 않습니다.
 
-## URL 설정하기
+
+
+## Model : orm으로 사용할 클래스를 정의하는 부분
+
+- django에서 model.py 선언한 클래스는 db의 table 입니다.
+- ORM은 django와 db를 연결해주는 기능을 합니다.
+- DB에 직접 들어가지 않고도 db를 다룰 수 있습니다. (굉장한 장점)
+
+- ORM으로 CRUD!
+    - 생성 
+    - 객체 = 클래스(값)으로 객체애 인스턴스 선언
+    - 저장 객체.save()
+    
+    - 조회
+    - 클래스.objects.all()
+    - 클래스.objects.get(조건)
+    
+    - 수정
+    - 조회로 한개의 객체 혹 여러개 객체를 가져옴
+    - 값을 수정
+    - 객체.save() 로 저장
+    
+    - 삭제
+    - 삭제할 객체를 조회로 불러옴
+    - 객체.delete()
+
+- 서버사이드 렌더링은 서버에 부하를 줄 수 있음
+- 하지만 seo측면에서 이미 완성된 페이지 이기 때문에 유리하다 (검색노출)
+
+- 파이썬에서 클래스로 테이블을 개발할 수 있습니다.
+- django.db 의 models를 임포트하고, 각 클래스에 models.Model을 상속받아서 선언합니다.
+- 필드 속성으로는 CharField, TextField, DateTimeField 등과 각 필드마다 옵션을 줄 수 있습니다.
+
+```python
+# hashtag 테이블 생성
+from django.db import models
+
+class HashTag(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    name = models.CharField(max_length=10)
+    
+    def __str__(self):
+        return self.name
+```
+
+> models.py에 변경점이 있으면 db가 변경되었기 때문에 makemigrations > migrate를 해주어야 합니다.
+
+### 테이블 상관관계 (모델 간의 관계) 개념 정리 필요
+
+1. OneToN
+ - 한쪽 테이블에서는 유일한 값(혹은 테이블 전체)가 다른 테이블에서 여러 번 들어갈 수 있는 관계
+ - :eyes: post와 댓글 관계
+
+2. OneToOne
+ - 각 테이블 안에 서로 유일해야 하는 값을 공유하는 경우
+ - :eyes: profile과 user의 관계
+
+3. NtoN
+ - to be continue...
+
+### admin 화면에서 db 관리 - admin.py
+
+- admin.py파일에 `models.py`에 정의한 클래스(테이블) 을 등록하면 `도메인/admin` url에서 테이블을 관리할 수 있습니다.
+- admin 페이지에서 CRUD 모두 가능
+
+```python
+from django.contrib import admin
+from .models import Post, Comment, HashTag # 작성한 models 임포트
+
+# Register your models here.
+admin.site.register(Post)
+admin.site.register(Comment)
+admin.site.register(HashTag)
+```
+
+
+## URL 설정하기 - urls.py
 - url 설정에는 하트코딩 방법과 별칭 방법으로 나뉩니다.
-- `path()`에 url pattern과 url mapping 으로 ulr를 설정해줍니다.
+- `path()`에 url pattern과 url mapping 으로 url를 설정해줍니다.
+
+> url pattern 에 설정한 변수명은 매핑한 views.py의 함수/클래스 메서드 의 인자와 일치해야 에러가 발생하지 않습니다.
+> 이 규칙은 템플릿에서 url태그 {% url '' 변수=값%} 를 사용할 때에도 변수에 url pattern에서 설정한 변수명으로 지정해야 동작합니다.
+> :exclamation:요청에 대한 url은 urls.py에서부터 찾아가기 때문 + 여러개의 변수를 줄 경우에 구분해야 하기 때문으로 생각합니다.
 
 1. 하드코딩
 - 하드코딩의 경우 일반적인 URL 형태로 작성되기 때문에 직관적으로 표현할 수 있습니다.
-
 - template에서 하드코딩은 일반적인 url작성 형식과 비슷합니다.
 
 ```html
+<!-- 템플릿 내에서..  -->
 {% for post in posts %} 
     <tr>
         <td><a href="/blog/detail/{{post.pk}}/">{{ post.title }}</a></td>
@@ -99,9 +181,9 @@ WSGI가 해당 applicationd을 call 하면 __call__메서드가 실행됩니다.
 ```
 
 2. 별칭
-- 개발 단계에서 URL을 리팩토링 하는 경우가 빈번하게 발생하는데, 별칭을 사용하면 URL 변경시 모든 파일을 찾아가며 수정해야 하는 일을 줄일 수 있습니다. 즉 **유지보수 측면에서 월등**합니다.
+- 개발 단계에서 URL을 리팩토링 하는 경우가 빈번하게 발생하는데, 별칭을 사용하면 URL 리팩토링시 모든 파일을 찾아가며 수정해야 하는 일을 줄일 수 있습니다. 즉 **유지보수 측면에서 월등**합니다.
 
-- 별칭을 사용하기 위해서는 urls.py파일에 앱 별칭(별칭 namespace)과 `urlpatterns` 요소마다 `name` 속성에 별칭으로 쓸 str를 할당하면 됩니다.
+- 별칭을 사용하기 위해서는 urls.py파일에 앱 별칭(별칭 namespace)과 `urlpatterns` 요소마다 `name` 속성에 별칭으로 쓸 str를 설정해줍니다.
 
 ```python
 # blog.urls.py
@@ -152,8 +234,8 @@ class Write(CreateView):
 {% endfor %}
 ```
 
-## View
-- 요청에 따른 응답을 정리해두는 부분
+## View - view.py
+- 요청에 따른 응답을 정리해두는 부분입니다.
 - 웹 요청을 받는다
 - 요청을 처리하고 데이터베이스에서 필요한 값이 있으면 가져온다.
 - 가져온 값을 가공해서 응답 형태로 만들어준다.
@@ -171,12 +253,13 @@ class Write(CreateView):
 
 ### View를 정의하는 방법
 
--view를 표현하는 방법은 다양하게 준비되어있고, generic view 는 자주 사용하는 기능들을 편리하게 사용하도록 만들어 둔 기능입니다. 그래서 일반 View를 상속해서 사용하는 것 보다 생략된 부분이 많아 처음 사용하면 동작을 이해하기 어려운 경우가 있습니다.
+- Django에서 view를 표현하는 방법은 다양하게 준비되어있습니다(FBV, CBV).
 
+- generic view 는 자주 사용하는 기능들을 편리하게 사용하도록 만들어 둔 기능입니다. 그래서 일반 View를 상속해서 사용하는 것 보다 생략된 부분이 많아 처음 사용하면 동작을 이해하기 어려운 경우가 있습니다.
 - generic view를 제외하고, 요청을 처리하는 함수들의 첫 인자는 `request`로 지정합니다.
 
 
-1. 함수형
+1. 함수형 Function Based View
 - urls.py 에 매핑할 함수를 정의합니다. urls.py에서는 함수 이름만 전달합니다. () 는 생략
 
 - HTTP 메서드는 인자로 전달받은 request를 통해 구분합니다.
@@ -201,11 +284,14 @@ from django.urls import reverse_lazy, reverse
 - 예외적으로 반환값이 HttpResponse()는 아니지만 별칭을 통해 경로를 전달할 수 있는 `reverse()` 사용 가능합니다.
 
 
-2. 클래스형
+2. 클래스형 Class Based View
 
 - urls.py 에 매핑할 클래스를 정의합니다. urls.py에서는 클래스이름.as_view() 를 전달합니다.
 
 - HTTP 메서드는 클래스의 메서드 이름으로 구분합니다.
+
+- return 값은 httpresponse를 리턴해줍니다.
+- 그래서 화면을 보여주기 위해서는 `render()`를, 단지 보여줄 경로만 전달할 경우에는 `redirect()` 를 리턴해줍니다.
 
 ```python
 from django.views import View
@@ -252,9 +338,10 @@ from .views import index
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("blog/", include("blog.urls")),
-    path("", index), ## 도메인 요청시 index 호출!
+    path("", index), ## 도메인 요청시 app.view.py 의 index() 호출!
 ]
 ```
+
 
 ## generic View
 
@@ -275,34 +362,106 @@ from django.views.generic import ListView, CreateView, DetailView
 
 - 템플릿 태그 {%%} 사용해서 편리하게 개발할 수 있습니다.
 
+### 탬플릿 태그
 
-## Model : orm으로 사용할 클래스를 정의하는 부분
+- 항상 시작 태그와 닫는 태그로 이루어져있습니다. 
+- 아닌 것도 있지만 그렇게 생각하는게 오류를 줄일 수 있습니다.
 
-- django에서 model.py 선언한 클래스는 db의 table 입니다.
-- ORM은 django와 db를 연결해주는 기능을 합니다.
-- DB에 직접 들어가지 않고도 db를 다룰 수 있습니다. (굉장한 장점)
+1. for 문
+```html
+{% for post in posts %}
+...
+{% endfor %}
+```
 
-- ORM으로 CRUD!
-    - 생성 
-    - 객체 = 클래스(값)으로 객체애 인스턴스 선언
-    - 저장 객체.save()
-    
-    - 조회
-    - 클래스.objects.all()
-    - 클래스.objects.get(조건)
-    
-    - 수정
-    - 조회로 한개의 객체 혹 여러개 객체를 가져옴
-    - 값을 수정
-    - 객체.save() 로 저장
-    
-    - 삭제
-    - 삭제할 객체를 조회로 불러옴
-    - 객체.delete()
-  
-- 서버사이드 렌더링은 서버에 부하를 줄 수 있음
-- 하지만 seo측면에서 이미 완성된 페이지 이기 때문에 유리하다 (검색노출)
+2. 조건문
+```html
+{% if content %}
+...
+{% else %}
+...
+{% endif %}
+```
 
+3. url 태그
+  - form이나 a 태그에 url를 설정하기 위한 태그
+  - 별칭을 사용한 방법으로 편리하고 유지보수에 뛰어납니다.
+
+```html
+{% url 'app_name:name' var=value %}
+```
+
+4. 값
+  - view에서 템플릿을 렌더링할 때 전달한 context 에서 지정한 key값들로 값을 사용할 수 있습니다.
+
+```python
+#views.py
+
+def index(request):
+  post = Post.objects.get(pk=1)
+  context = {'post': post}
+```
+
+```html
+<p>{{ post.content }}</p>
+```
+
+5. crsf 토큰.
+  - form 태그 사용 시 django에서 인정한 요청임을 확인시켜주는 태그.
+  - form 태그 사이에 넣어주어야 정상 동작합니다.
+```html
+<form ... >
+  {% csrf_token %}
+  ...
+</form>
+```
+
+6. block 과 extends
+  - 아래 절에서 자세히 설명합니다.
+```html
+{% extends base.html %}
+{% block content %}
+{% endblock %}
+```
+
+### 탬플릿 파일을 쪼개서 개발하기
+
+- {% block content %} / {% endblock %} 과 {% extends ~~ %} 태그를 통해 템플릿 파일들을 조립하듯이 사용할 수 있습니다.
+
+- 다른 템플릿이 들어갈 부분에 block 태그로 표시해줍니다.
+```html
+<!-- base.html -->
+ <body>
+    <div class="container">
+      <h1>Blog</h1>
+      {% block content %}
+      {% endblock %}
+    </div>
+
+    <script ...> </script>
+  </body>
+```
+
+- 해당 파일을 base.html의 block 태그에 끼워넣어진다고 생각하면 됩니다.
+- 끼워넣을 파일을 {% extends 템플릿파일명 %}로 지엉하고, 전달될 내용부분을 block 태그로 감싸면 됩니다.
+
+```html
+<!-- post_edit.html -->
+{% extends 'blog/base.html' %}
+
+{% block content %}
+<form method="post">
+    {% csrf_token %}
+    {{ form.title.label_tag }}
+    <input type="text" name="{{ form.title.name }}" value="{{ form.initial.title }}">
+    <br>
+    {{ form.content.label_tag }}
+    <textarea type="text" name="{{ form.content.name }}">{{ form.initial.content }}</textarea>
+    <br>
+    <input type="submit">
+</form>
+{% endblock %}
+```
 
 ## forms.py
 
@@ -311,15 +470,15 @@ from django.views.generic import ListView, CreateView, DetailView
 
 - 일반 form 과 modelform이 있습니다.
 
-
 1. 일반 form
   - HTML 에 있는 form 태그를 가리킵니다.
 
 2. ModelForm
   - models.py에 정의한 클래스(DB테이블)을 이용해서 form을 정의합니다.
+  - 템플릿에 form을 직접 생성할 필요 없습니다.
 
 ```python
-# blog/forms.py
+# blog/forms.py ## db에 연동할 form 형태 정의
 from django import forms
 from .models import Post, Comment
 
@@ -340,10 +499,11 @@ class CommentForm(forms.ModelForm):
         
 ```
 
-- views.py에서..
+- views.py에서 정의한 폼의 인스턴스를 활용하여 유효성 검사(`.is_valid()`)
+- 렌더링에 필요해 폼을 전달할 때에는 dictionary 형태로 전달합니다. (context에 넣어서 context로 전달해도 됩니다.)
 
 ```python
-# 뷰 단에서는 이렇게 사용합니다.
+# view.py 뷰 단에서는 이렇게 사용합니다.
 
 def write(request):
     if request.method == "POST":
@@ -357,9 +517,11 @@ def write(request):
     return render(request, 'blog/post_form.html', {'form': form}) #생성한 form이 렌더링됨
 ```
 
-- templates 파일
+- templates 파일 에서는 값 태그로 태그를 그릴 수 있습니다.
+- 폼.as_p 뿐만 아니라 테이블, div 등 다양하게 표현이 가능하며, form에서 정의한 fields 값만 표현할 수도 있습니다. (ex_ form.title)
 
 ```html
+<!-- templates 파일 -->
 {% extends 'blog/base.html' %}
 {% block content %}
 <p>블로그 글 작성 화면</p>
@@ -374,3 +536,16 @@ def write(request):
 {% endblock %}
 
 ```
+
+
+## backend - frontend 통신 : API
+
+- 프론트와 백엔드도 서로 통신을 합니다.
+- 통신 방법을 API라고 합니다.
+
+- 지금까지 배운 Django처럼 서버사이드 렌더링을 할 때에는 프론트쪽에서 템플릿을 수정하면 됩니다. 하지만, 서버의 규모가 커지면 서버에서 직접 렌더링해서 보내주는게 서버의 컴퓨팅 리소스, 개발 리소스 면에서 부담으로 작용할 수 있습니다..
+
+- API로 통신 해서 프론트 쪽에 데이터를 전달하면 프론트 쪽에서 보여주는 작업을 수행합니다.
+- 데이터는 서버에서 클라이언트에게 JSON 으로 값을 보내주고, 프론트는 그 JSON 데이터를 브라우저 화면에 보여줍니다.
+
+- 이런 API를 제공하는 서버를 설계하는 프레임워크 : Django REST Framework
