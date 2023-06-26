@@ -549,3 +549,147 @@ def write(request):
 - 데이터는 서버에서 클라이언트에게 JSON 으로 값을 보내주고, 프론트는 그 JSON 데이터를 브라우저 화면에 보여줍니다.
 
 - 이런 API를 제공하는 서버를 설계하는 프레임워크 : Django REST Framework
+
+---
+
+# user app
+
+- 사용자에 대한 정보를 취급하는 `user` 앱을 개발할 것입니다.
+
+## 유저 기능 만들기 준비
+
+- 전체 사용할 user를 user 앱에다가 선언했는데, 프로젝트 전체에서 user를 사용하기 싶다면 프로젝트의 `settings.py`의 import 바로 아래에 아래와 같이 추가해주어야 합니다.
+
+```python
+# app.settings.py
+from pathlib import Path
+
+# Auth user 
+# user 앱의 User 모델
+AUTH_USER_MODEL = 'user.User'
+```
+
+> migrate or makemigrations ... 에러날떄
+  - https://blue-coding-story.tistory.com/177
+  - settings.py에 위에처럼 (AUTH_USER_MODEL = 'user.User') 등록 했는데도 에러나면
+
+  1. migrations폴더에 __init__.py 를 제외한 모든 파일 삭제
+  2. venv의 db.sqlite3 파일 삭제
+  3. makemigrations > migrate 다시해보기
+
+createsuperuser
+myadmin
+myadmin@aaaaa.com
+1234
+
+
+## 회원가입 기능 만들기
+
+- 먼저 기능을 개발 할 때는 아래 단계를 꼭 기억하기 바랍니다.
+
+> 구현기능분석 - model - view / url - templates
+
+
+### 유저 테이블 생성하기 : models.py
+
+- `AbstractUser` 클래스를 사용해 인증기능이 개발되어있는 클래스로 개발합니다.
+- email을 아이디처럼 사용할 것이기 때문에 `unique = True` 옵션을 주었습니다.
+
+- USERNAME_FIELD : 로그인시 form에서 전송할 username에 대한 값을 email로 넘겨줄 것이라고 명시
+- REQUITRED_FIELD: 필수요소 설정. USERNAME_FIELD로 된 변수는 제외해야 합니다.
+
+```python
+# user.models.py
+from django.db import models
+from django.contrib.auth.models import AbstractUser # django의 인증기능이 적용된 모델
+
+class User(AbstractUser):
+    email = models.EmailField(unique=True, max_length=255)
+    name = models.CharField(max_length=50, null=True, blank=True)
+    password = models.CharField(max_length=50)
+    registered_date = models.DateTimeField(auto_now_add=True)
+
+    USERNAME_FIELD = 'email' #인증시 username으로 들어갈 column 설정
+    REQUIRED_FIELDS = [] #필수 요소 설정가능
+    
+    def __str__(self):
+        return self.name
+```
+
+- models.py에 변경사항이 있으면 반드시 db에 반영해주어야 합니다.
+
+> python manage.py makemigrations
+> python manage.py migrate
+
+### 유저 뷰 : view.py
+
+- 회원가입, 로그인, 로그아웃에 대한 처리를 구현합니다.
+- 각 기능에서 get, post가 필요한지 고민하고 구현합니다.
+
+1. 회원가입
+  - 회원가입 페이지를 보여주는 것과 유저 정보가 db에 저장되는것이 필요하므로 get과 post 둘다 필요합니다.
+  - 회원정보 입력할 form 생성해서 view에서 보여주고 유효성검사합니다.
+
+2. 로그인
+  - 로그인 화면을 보여주는 것과 입력한 id, pw를 전달해야 하므로 get과 post 둘다 필요합니다.
+  - email, pw를 입력할 form 필요합니다.
+
+3. 로그아웃
+  - 아직 제대로 구현되지 않았습니다.
+  
+
+```python
+# View를 사용할것이므로 
+from django.views import View #일반 뷰 임포트
+from .models import User
+
+class Registration(View):
+  ...
+
+class Login(View):
+  ...
+
+class Logout(View):
+  ...
+  
+```
+
+### 로그인 기능
+
+- 아래 함수들을 이용해서 차례대로 계정인증, 로그인, 로그아웃 기능을 쉽게 구현할 수 있습니다.
+
+```python
+from django.contrib.auth import authenticate, login, logout
+```
+
+- authenticate()
+- 입력된 email(id), password가 DB에 존재하고 일치하는지 인증하는 함수입니다.
+
+```python
+## view.py 로그인 post 처리
+
+# models.py에 USERNAME_FIELD, REQUIRED_FIELDS 설정필요
+# 등록된 유저면 True, 없으면 False가 리턴됨
+user = authenticate(username=email, password=password)
+
+if user:
+    login(request, user)
+    return redirect('blog:list')
+
+# 폼에 에러를 추가해줍니다.
+form.add_error(None, '아이디가 없습니다.')
+```
+
+- django auth 로그인은 세션을 통해서 로그인을 유지시켜줍니다. >> http_cookie_session.md 에 정리
+- 세션으로 로그인이 되어있어서 로그인 확인 처리를 안하면 로그인 화면에 들어갔을 때 이미 있는 아이디라고 오류가 났다고 이해해주세요.
+- 로그인이 되어있을 경우 return을 해주는 코드를 추가해주어야 합니다.
+
+```python
+## views.py 로그인 기능 시 로그인이 이미 되어있는 상태일 경우 바로 redirect
+if request.user.is_authenticated:
+    return redirect('blog:list')
+```
+
+## 경로설정 : urls.py
+
+- path함수를 이용해서 패턴, 매핑 해줍니다.
