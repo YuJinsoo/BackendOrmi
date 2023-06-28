@@ -74,6 +74,7 @@ Password: FUYzVFF6YP4WqhA
  프레임워크에서 알아서 스스로 찾아서 쓰게끔 만들어짐
  
 
+## SQL 메인 함수들..
 
 ### SELECT
 
@@ -181,3 +182,4 @@ select
 from users;
 
 ```
+
