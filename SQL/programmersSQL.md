@@ -178,15 +178,53 @@ ORDER BY ANIMAL_TYPE;
 - LEVEL2
 - https://school.programmers.co.kr/learn/courses/30/lessons/131529
 ```SQL
-
+SELECT 
+    substr(PRODUCT_CODE, 1, 2) AS CATEGORY,
+    COUNT(PRODUCT_ID)
+FROM PRODUCT
+GROUP BY substr(PRODUCT_CODE, 1, 2);
+-- GROUP BY 에 SUBSTR사용가능합니다.
 ```
 
-## 문제: 
-- LEVEL
-- 
+## 문제: 가격대 별 상품 개수 구하기
+- LEVEL2
+- https://school.programmers.co.kr/learn/courses/30/lessons/131530
 ```SQL
-
+SELECT
+    TRUNCATE(PRICE, -4) AS PRICE_GROUP,
+    COUNT(PRODUCT_ID) AS PRODUCTS
+FROM PRODUCT
+GROUP BY TRUNCATE(PRICE, -4)
+ORDER BY PRICE_GROUP;
 ```
+
+## 문제: 동명 동물 수 찾기
+- LEVEL2
+- https://school.programmers.co.kr/learn/courses/30/lessons/59041
+```SQL
+SELECT
+    NAME,
+    COUNT(ANIMAL_ID)
+FROM ANIMAL_INS
+WHERE NAME IS NOT NULL 
+GROUP BY NAME
+HAVING COUNT(ANIMAL_ID) >= 2
+ORDER BY NAME
+```
+
+## 문제: 재구매가 일어난 상품과 회원 리스트 구하기
+- LEVEL2
+- https://school.programmers.co.kr/learn/courses/30/lessons/131536
+```SQL
+SELECT USER_ID, PRODUCT_ID
+FROM ONLINE_SALE 
+GROUP BY USER_ID, PRODUCT_ID
+HAVING COUNT(USER_ID)>=2
+ORDER BY USER_ID, PRODUCT_ID DESC;
+```
+---
+# 문제 6
+
 
 ## 문제: 
 - LEVEL
