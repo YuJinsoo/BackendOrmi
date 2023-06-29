@@ -455,7 +455,8 @@ select email, POSITION('@' IN email)
 from users
 ```
 
--  coalesce: coalesce은 해당 컬럼에 NULL값이 있는 경우 다른 값으로 채워넣을 수 있습니다.
+-  coalesce: 해당 컬럼에 NULL값이 있는 경우 다른 값으로 채워넣을 수 있습니다.
+- 다른 DBMS에는 `ifnull`이라는 함수가 있는데 postgre는 없고 이 함수가 있습니다.
 ```sql
 select coalesce(name, '담당자 지정 안됨')
 from weniv_event;
@@ -528,6 +529,8 @@ SELECT '2011-12-01 11:12:34'::DATE;
 SELECT '2011-12-01 11:12:34'::TIME;
 SELECT '2011-12-01 11:12:34'::TIMESTAMP;
 ```
+
+---
 
 ## 날짜함수
 
