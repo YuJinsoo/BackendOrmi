@@ -390,6 +390,7 @@ select * from user_data
 
 - 예제
 - user_data와 user_order_counts 라는 임의의 테이블을 만들어두고, 나중에 불러다가 from과 join에서 선택해서 사용할 수 있습니다.
+- 아래처럼 `,`로 구분하여 여러개를 선언해줄 수 있습니다.
 ```sql
 WITH user_data AS (
 	select id, email
