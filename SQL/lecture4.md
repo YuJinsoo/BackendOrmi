@@ -762,3 +762,9 @@ DROP TABLE sample_table2;
       
 
 
+## 도구
+
+- neon : https://neon.tech/
+  - db를 웹에서 생성해서 로컬에 있는 db tool 로 연결해서 간단하게 사용할 수 있습니다.
+  - 단점은 조금 느립니다.
+  
