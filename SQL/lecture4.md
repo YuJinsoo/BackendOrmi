@@ -767,4 +767,17 @@ DROP TABLE sample_table2;
 - neon : https://neon.tech/
   - db를 웹에서 생성해서 로컬에 있는 db tool 로 연결해서 간단하게 사용할 수 있습니다.
   - 단점은 조금 느립니다.
-  
+
+- 데이터페이스를 생성한 다음에 연결 자료를 Django로 하면 아래와 같이 보기 편하게 나누어줍니다. 아래 정보를 입력해서 db에 연결할 수 있습니다.
+```json
+DATABASES = {
+  'default': {
+    'ENGINE': 'django.db.backends.postgresql',
+    'NAME': 'neondb',
+    'USER': 'YuJinsoo',
+    'PASSWORD': 'APclU2qZrk9m',
+    'HOST': 'ep-shiny-sun-654148.ap-southeast-1.aws.neon.tech',
+    'PORT': '5432',
+  }
+}
+```
