@@ -693,3 +693,190 @@ if request.user.is_authenticated:
 ## 경로설정 : urls.py
 
 - path함수를 이용해서 패턴, 매핑 해줍니다.
+
+---
+
+# auth 기능
+
+- `from django.contib.auth ` 로 시작하는 기능들입니다.
+- 장고에서 제공하는 기본 인증 시스템입니다. 로그인, 회원가입, 로그아웃 등의 기능을 사용할 때 유용하게 활용할 수 있는 미리 개발된 기능입니다.
+
+```python
+# django의 인증기능이 적용된 모델
+from django.contrib.auth.models import AbstractUser, BaseUserManager 
+from django.utils import timezone # django의 시간확인 유틸모듈
+```
+
+- auth 기능에 `User`클래스를 바로 사용해도 되지만 유연성이 부족합니다. 그래서 `AbstractUser`를 보통 사용합니다.
+
+## Auth 활용한 User 개발 : models.py
+
+- `AbstractUser` 는 인증기능을 사용해 사용자를 쉽게 모델링 하기 위한 클래스 입니다.
+
+  > 기본적인 User Model. AbstractUser에 필수여부 O인것들은 미리 선언되어있습니다.
+  >  칼럼명 -	설명 - 	필수여부 -	데이터타입
+  > 1	id	PK	O	int
+  > 2	username	이름(전체)	O	char
+  > 3	first_name	성	X	char
+  > 4	last_name	이름	X	char
+  > 5	email	이메일	X	char
+  > 6	password	암호화된 비밀번호	O	char
+  > 7	is_staff	admin접속 가능 여부	O	bool
+  > 8	is_activate	계정 활성 여부	O	bool
+  > 9	is_superuser	모든 권한 활성 여부	O	bool
+  > 10	last_login	마지막으로 로그인한 시간	O	datetime
+  > 11	date_joined	계정이 생성된 날짜	O	datetime
+
+- `BaseUserManager`는 `AbstractUser`를 상속한 클래스로 유저를 생성, 삭제, 수정 등의 동작을 할 때 도움을 주는 헬퍼 클래스입니다.
+
+- AbstractUser에 사용하라고 미리 할당된 변수들이 있는데 보통 id는 `username`으로 사용합니다.
+- 우리 프로젝트에서는 email 주소를 아이디로 사용하고 싶었습니다. 그렇기 때문에 `email` 멤버를 username처럼 사용하기 위해 `BaseUserManager`를 상속한 클래스를 생성해 메서드를 오버라이드합니다.
+
+```python
+# BaseUserManager에는 아래 주석처럼 함수가 2개 있는데 둘 다 오버라이드 해서 재정의해줍니다.
+class UserManager(BaseUserManager):
+    def _create_user(self, email, password, is_staff, is_superuser, **extra_fields):
+        if not email:
+            raise ValueError('User must have an email')
+        now = timezone.now() ## 현재 시간을 편리하게 확인해서 넣어줄 수 있습니다.
+        email = self.normalize_email(email)
+        user = self.model(
+            email = email,
+            is_staff = is_staff,
+            is_active = True,
+            is_superuser = is_superuser,
+            last_login = now,
+            date_joined = now
+        )
+        user.set_password(password)
+        user.save(using = self._db)
+        return user
+        
+    # BaseUserManger함수 1 : create_user
+    def create_user(self, email, password, **extra_fields):
+        return self._create_user(email, password, False, False, **extra_fields)
+    
+    # BaseUserManger함수 2 : create_superuser
+    def create_superuser(self, email, password, **extra_fields):
+        return self._create_user(email, password, True, True, **extra_fields)
+
+```
+
+- 또한 모델에 USERNAME_FIELD, EMAIL_FIELD, REQUIRED_FIELDS 를 설정하고, 변경한 `BaseUserManager`를 적용합니다.
+
+```python
+# model
+class User(AbstractUser):
+    email = models.EmailField(unique=True, max_length=255)
+    name = models.CharField(max_length=50, null=True, blank=True)
+
+    is_staff = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
+    last_login = models.DateField(null=True, blank=True)
+    date_joined = models.DateField(auto_now_add=True)
+    
+    # authenticate의 username kwargs 에 email이 들어갈 것이라는 걸 미리 알려줌
+    # 유일한 값인 email 이므로 id처럼 쓸수있음
+    USERNAME_FIELD = 'email'
+    EMAIL_FIELD = 'email'
+    REQUIRED_FIELDS = []
+    
+    # BaseUserManager를 오버라이드한 클래스UserManager를 설정해줍니다.
+    objects = UserManager()
+```
+
+### 다른 앱에서도 auth 유저를 사용하기
+
+- settings.py에 아래와 같이 경로를 등록해주어야 합니다.
+- `user` 앱에 `User` 모델을 다른 앱에서 사용하도록 등록한 것입니다.
+
+```python
+# settings.py
+AUTH_USER_MODEL = 'user.User'
+```
+
+## Auth 활용한 Form 개발 : forms.py
+
+- Auth 기능을 활용한 객체를 form을 통해 입력/확인하고 싶을때 Auth의 form을 사용해야 합니다.
+
+- 아래 모듈을 임포트해서 사용합니다.
+- 회원가입과 로그인 동작에 대한 폼이 필요하니까 각각 `UserCreationForm`, `AuthenticationForm`이 필요합니다.
+```python
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+```
+
+- 또한 외부에서 User를 사용하도록 설정한 것을 불러올때는 아래와 같이 불러올 수 있습니다.
+```python
+#인증을 받아서 확장한 모델 불러옴. settings.py의  AUTH_USER_MODEL.
+from django.contrib.auth import get_user_model  
+
+## auth를 확장된 모델을 가져오게 됩니다.
+User = get_user_model()
+```
+
+- `UserCreationForm`, `AuthenticationForm`를 상속해서 Form을 만들어줍니다.
+- `AbstractUser`에서 필수인 부분을 자동으로 전달하므로 fields를 설정할 필요가 없습니다. 다만 아이디로 사용하려고 했던 `email`은 필수가 아니기 때문에 아래와 같이 추가해주어야 합니다.
+```python
+# user.forms.py
+class RegisterForm(UserCreationForm):
+    
+    class Meta():
+        model = User
+        # 필수부분만 자동으로 하기 때문에 email도 추가함
+        fields = UserCreationForm.Meta.fields + ('email',)
+
+
+class LoginForm(AuthenticationForm):
+    
+    class Meta():
+        model = User
+```
+
+
+## User가 필요한 모델에 User column 추가하기
+```python
+## blog.models.py
+from django.contrib.auth import get_user_model
+
+## auth를 확장된 모델을 가져오게 됩니다.
+User = get_user_model()
+
+
+# Create your models here.
+class Post(models.Model):
+    title = models.CharField(max_length=30)
+    content = models.TextField()
+    # User와 Post는 1:N 관계이므로 ForeignKey를 사용합니다.
+    writer = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+```
+
+
+## Auth 기능의 Mixin을 활용 :  Views.py
+
+- 다중 상속
+- mixin은 추가 기능이 필요한 클래스에 상속해서 유연성 있게 사용하는 것입니다.
+- 보일러 플레이트(변화없이 여러 군데에서 반복되는 코드)를 줄일 수 있습니다.
+
+- 다른객체가 가진 기능을 내가 사용하는 객체에 사용하게 하려면 상속을 해야 합니다.
+
+### LoginRequiredMixin
+
+- 글쓰기 기능은 글(Post)에 작성자(writer)가 반드시 들어가야 하므로 로그인이 되어있는 상태에서 접근이 가능해야 합니다.
+- 그러한 기능을 제공하기 위해 미리 제공된 클래스 `LoginRequiredMixin` 를 Write에 상속해서 사용하면 자동으로 로그인된 상태가 아니면 동작이 안되도록 만들어줍니다.
+
+```python
+# auth의 mixin 기능
+from django.contrib.auth.mixins import LoginRequiredMixin
+
+class Write(LoginRequiredMixin, View):
+    # Mixin : LoginREquiredMixin
+    def get(self, request):
+        ...
+    
+    def post(self, request):
+        ...
+
+```
