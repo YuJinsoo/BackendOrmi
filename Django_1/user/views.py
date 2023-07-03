@@ -3,7 +3,7 @@ from django.urls import reverse
 from django.views import View #일반 뷰 임포트
 from django.contrib.auth import authenticate, login, logout
 
-from .models import User
+# from .models import User ## from django.contrib.auth import get_user_model
 from .forms import RegisterForm, LoginForm
 
 # Create your views here.

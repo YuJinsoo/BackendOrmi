@@ -5,6 +5,9 @@ from django.views import View
 from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView #generic view
 from django.urls import reverse_lazy, reverse
 
+# auth의 mixin 기능
+from django.contrib.auth.mixins import LoginRequiredMixin
+
 from .models import Post, Comment, HashTag
 from .forms import PostForm, CommentForm, HashTagForm
 
@@ -21,20 +24,20 @@ from .forms import PostForm, CommentForm, HashTagForm
 #     return HttpResponse('No!!!')
 
 ## 클래스형
-# class Index(View):
-#     def get(self, request):
-#         # return HttpResponse('Indext page GET class')
+class Index(View):
+    def get(self, request):
+        # return HttpResponse('Indext page GET class')
         
-#         # 데이터베이스에 접근해서 값을 가져와야 합니다.
-#         # 게시판에 글들을 보여줘야 하기 때문에 데이터베이스에서 "값 조회"
-#         # MyModel.objects.all()
-#         post_objs = Post.objects.all()
-#         # context = DB에서 가져온 값
-#         context = {
-#             "posts": post_objs,
-#         }
-#         # print(post_objs) # Query_Set<1 ,2, 3, 4, 5>
-#         return render(request, 'blog/post_list.html', context)
+        # 데이터베이스에 접근해서 값을 가져와야 합니다.
+        # 게시판에 글들을 보여줘야 하기 때문에 데이터베이스에서 "값 조회"
+        # MyModel.objects.all()
+        post_objs = Post.objects.all()
+        # context = DB에서 가져온 값
+        context = {
+            "posts": post_objs,
+        }
+        # print(post_objs) # Query_Set<1 ,2, 3, 4, 5>
+        return render(request, 'blog/post_list.html', context)
     
 
 # # write
@@ -58,18 +61,45 @@ from .forms import PostForm, CommentForm, HashTagForm
 # model, template_name, context_object_name, 
 # paginate_by (페이징처리), form_class, form_valid(), 
 # django.views.generic -> ListView
-class List(ListView):
-    model = Post # 어떤 models의 테이블 사용할지 설정
-    template_name = 'blog/post_list.html' # 템플릿 지정
-    context_object_name = 'posts' # 템플릿으로 넘어갈때 변수이름
+# class List(ListView):
+#     model = Post # 어떤 models의 테이블 사용할지 설정
+#     template_name = 'blog/post_list.html' # 템플릿 지정
+#     context_object_name = 'posts' # 템플릿으로 넘어갈때 변수이름
 
 # CBV, django.views.generic -> CreateView
 # get일때는 PostForm을 보고 form과 input을 렌더링하고, post일때는 그 form에서 요청을 전송한다.
-class Write(CreateView):
-    model = Post #모델
-    form_class = PostForm # 폼
-    # template_name = 'blog/post_form.html'
-    success_url = reverse_lazy('blog:list') # 성공시 보내줄 url
+# class Write(CreateView):
+#     model = Post #모델
+#     form_class = PostForm # 폼
+#     # template_name = 'blog/post_form.html'
+#     success_url = reverse_lazy('blog:list') # 성공시 보내줄 url
+
+
+# 이 클래스 동작 전제가 login이 되어있어야 동작하게 됩니다.
+# 로그인 하지 않았으면 동작하지 않습니다.
+class Write(LoginRequiredMixin, View):
+    # Mixin : LoginREquiredMixin
+    def get(self, request):
+        form = PostForm()
+        context = {
+            'form': form
+        }
+        return render(request, 'blog/post_form.html', context=context)
+    
+    def post(self, request):
+        form = PostForm(request.POST)
+        if form.is_valid():
+            # 가져온 내용을 객체로 저장하는데, (commit=False) 으로 할당만 하고 수정 가능한 상태
+            post = form.save(commit=False) 
+            post.writer = request.user
+            post.save()
+            return redirect('blog:list')
+        
+        form.add_error(None, '폼이 유효하지 않습니다.')
+        context = {
+            'form': form
+        }
+        return render(request, 'blog/post_form.html', context=context)
 
 
 class Detail(DetailView):

@@ -12,7 +12,7 @@ urlpatterns = [
     # CBV 방식
     # path("", Index.as_view()),  ## 이렇게 하려면 # from blog.views import Index #해줘야함
     # path("", views.Index.as_view(), name='list'),
-    path("", views.List.as_view(), name='list'),
+    path("", views.Index.as_view(), name='list'),
     
     # 글 상세 조회
     # path("detail/<int:pk>/", views.Detail.as_view(), name='detail'), #/blog/detail/1

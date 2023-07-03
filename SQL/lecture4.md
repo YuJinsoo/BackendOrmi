@@ -769,7 +769,8 @@ DROP TABLE sample_table2;
   - 단점은 조금 느립니다.
 
 - 데이터페이스를 생성한 다음에 연결 자료를 Django로 하면 아래와 같이 보기 편하게 나누어줍니다. 아래 정보를 입력해서 db에 연결할 수 있습니다.
-```json
+
+```python
 DATABASES = {
   'default': {
     'ENGINE': 'django.db.backends.postgresql',
