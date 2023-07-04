@@ -424,9 +424,16 @@ def index(request):
 {% endblock %}
 ```
 
+7. 다른 템플릿을 현재 템플릿에 불러서 붙여넣기
+  - 전달된 폼에 에러가 있을 경우, 에러를 출력하는 공간을 따로 부여하고, 표현할 템플릿을 따로 두어서 사용했습니다.
+```html
+{% include 'blog/form_error.html' %}
+```
+
+
 ### 탬플릿 파일을 쪼개서 개발하기
 
-- {% block content %} / {% endblock %} 과 {% extends ~~ %} 태그를 통해 템플릿 파일들을 조립하듯이 사용할 수 있습니다.
+- {% block content %} / {% endblock %} 과 {% extends filename %} {% include filename %} 태그를 통해 템플릿 파일들을 조립하듯이 사용할 수 있습니다.
 
 - 다른 템플릿이 들어갈 부분에 block 태그로 표시해줍니다.
 ```html
@@ -696,6 +703,81 @@ if request.user.is_authenticated:
 
 ---
 
+# user 기능추가로 blog 변경
+
+- blog의 DB에 작성자 column 에는 user가 들어가도록 수정했습니다.
+
+## Update를 뷰로
+
+- update는 작성 페이지에 빈 form이 출력되는 것이 아니라 기존에 작성된 값이 들어있어야 합니다.
+- 왜냐하면 수정되어야지 모두 다시 작성하는것은 '수정'요청에 맞지 않기 때문입니다.
+
+- 또한 Update는 수정 페이지를 불러오고, 수정된 내용을 저장해야 하기 때문에 `get`과 `post` 둘다 필요합니다.
+
+- form의 초기값은 DB Post에서 해당 post를 받아와서 해당 내용을 작성한 폼(PostForm()) 의 `initial` 키워드 변수에 dictionary로 전달해주면 됩니다.
+
+```python
+class Update(View):
+    def get(self, request, pk): # pk = post_id 상세페이지에서 넘어가기 때문에 pk 있음
+        post = Post.objects.get(pk=pk)
+        form = PostForm(initial={'title': post.title, 'content':post.content})
+        context = {
+            'form': form,
+            'post': post
+        }
+        return render(request, 'blog/post_edit.html', context=context)
+        
+    def post(self, request, pk):
+        post = Post.objects.get(pk=pk)
+        form = PostForm(request.POST)
+        if form.is_valid():
+            post.title = form.cleaned_data['title']
+            post.content = form.cleaned_data['content']
+            post.save()
+            return redirect('blog:detail', post_id=pk)
+        
+        form.add_error(None, '폼이 유효하지 않습니다.')
+        context ={
+            'form':form
+        }
+        return render(request, 'blog/form_error.html', context=context)
+```
+
+### form 활용
+- form을 전달하는 경우에 실패 시에 어떤 에러가 났는지 알려주어야 합니다.
+- `redirect`는 단순히 url만 전송하기 때문에 어떤 에러가 발생했는지 알 수 없습니다.
+- 전달한 `form`에 `add_error`로 에러 내용을 추가한 뒤 `render`를 활용해서 context에 넣어 전달합니다.
+
+```python
+def post(self, request, pk):
+        post = Post.objects.get(pk=pk)
+        form = PostForm(request.POST)
+        if form.is_valid():
+            ## 성공
+        
+        ## form 이 유효하지 않으면...
+        form.add_error(None, '폼이 유효하지 않습니다.')
+        context ={
+            'form':form
+        }
+        return render(request, 'blog/form_error.html', context=context)
+```
+
+- 그 이후에 전달받은 template에는 전달받은 내용을 출력하는 부분을 작성해줍니다.
+
+```html
+<!-- form에 에러 내용이 있으면 에러 표현하는 템플릿에 넣어서 표현 -->
+{% if form.errors %}
+    {% include 'blog/form_error.html' %}
+{% else %}
+ ...
+
+{% endif %}
+```
+
+
+---
+
 # auth 기능
 
 - `from django.contib.auth ` 로 시작하는 기능들입니다.
@@ -854,6 +936,7 @@ class Post(models.Model):
 ```
 
 
+
 ## Auth 기능의 Mixin을 활용 :  Views.py
 
 - 다중 상속
@@ -861,6 +944,17 @@ class Post(models.Model):
 - 보일러 플레이트(변화없이 여러 군데에서 반복되는 코드)를 줄일 수 있습니다.
 
 - 다른객체가 가진 기능을 내가 사용하는 객체에 사용하게 하려면 상속을 해야 합니다.
+
+
+### Mixin이란
+- django에서 미리 정의된 클래스
+- 인증, 권한, 폼 등 하나의 부가 기능들을 추가로 사용할 수 있게 제공
+  - LoginRequiredMix: 인증(로그인), 인증되지 않은 경우 로그인 페이지로 리디렉션
+  - PermissionRequiredMixin: 권한, 사용자에게 필요 권한이 없으면 엑세스 거부 (HTTP 403 Forbidden)
+  - UserPassesTestMixin: 사용자가 특정 조건을 통과할 수 잇는지 테스트
+  - FormMixin: 폼 처리 기능 >> 나중에 정리
+  - genericView: TemplateView, DetailView, CreateView, UpdateView, DeleteView ...
+
 
 ### LoginRequiredMixin
 
@@ -880,3 +974,104 @@ class Write(LoginRequiredMixin, View):
         ...
 
 ```
+
+- `LoginRequiredMixin`을 통과하지 못하면 `settings.py` 안에 있는 `login_url` 경로로 사용자를 보내줍니다. 
+- 이 부분은 아직 `settings.py`에 해당 상수를 설정하지 않았기 때문에 설정이 안 된 상태입니다.
+- 만약 다른 경로로 보내주고 싶으면 `LoginRequiredMixin` 을 상속한 클래스 안에서 `redirect_filed_name`을 설정해줘서 다른 경로로 보내줄 수 있습니다.
+
+
+
+
+---
+
+# request
+- views.py에는 클라이언트에서 요청한 http형식 request가 전달됩니다.
+- 그래서 FBV든 CBV든 함수의 인자에 `request`가 필수로 들어갑니다.
+  - view에서 받는 class와 함수에는 항상 request (http객체)르 반드시 받음.
+
+- request에는 여러가지 정보가 담겨있는데 대표적으로 http요청을 보낸 유저가 누구인지 정보가 담겨있습니다.
+
+```python
+## 게시물을 작성하는 write요청의 request를 출력해보았습니다.
+def post(self, request):
+        print("request", request)
+        print("request", dir(request))
+        print("request.user", request.user)
+        print("request.body", request.body)
+        print("request.environ", request.environ)
+        print("request.FILES", request.FILES)
+        print("request.method", request.method)
+        print("request.content_type", request.content_type)
+```
+
+```python
+## 출력
+request <WSGIRequest: POST '/blog/write/'>
+request ['COOKIES', 'FILES', 'GET', 'META', 'POST', '__class__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__iter__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__', '_body', '_cached_user', '_current_scheme_host', '_encoding', '_files', '_get_full_path', '_get_post', '_get_raw_host', '_get_scheme', '_initialize_handlers', '_load_post_and_files', '_mark_post_parse_error', '_messages', '_post', '_read_started', '_set_content_type_params', '_set_post', '_stream', '_upload_handlers', 'accepted_types', 'accepts', 'body', 'build_absolute_uri', 'close', 'content_params', 'content_type', 'csrf_processing_done', 'encoding', 'environ', 'get_full_path', 'get_full_path_info', 'get_host', 'get_port', 'get_signed_cookie', 'headers', 'is_secure', 'method', 'parse_file_upload', 'path', 'path_info', 'read', 'readline', 'readlines', 'resolver_match', 'scheme', 'session', 'upload_handlers', 'user']
+request.user admin@email.com
+request.body b'csrfmiddlewaretoken=rg9uS3tId5kgjjCFQarmAITz3McDhHrpQKaGaGFvL3a1Qjlp34fedvhOe7KT6ulZ&title=t4&content=c4'
+request.environ {'ACLOCAL_PATH': 'C:\\Program Files\\Git\\mingw64\\share\\aclocal;C:\\Program Files\\Git\\usr\\share\\aclocal', 'ALLUSERSPROFILE': 'C:\\ProgramData', 'APPDATA': 'C:\\Users\\ABO\\AppData\\Roaming', 'CHROME_CRASHPAD_PIPE_NAME': '\\\\.\\pipe\\LOCAL\\crashpad_13876_XDMTBRITEMGBUYZN', 'COLORTERM': 'truecolor', 'COMMONPROGRAMFILES': 'C:\\Program Files\\Common Files', 'COMPUTERNAME': 
+'DESKTOP-C8VM12G', ... }
+request.FILES <MultiValueDict: {}>
+request.method POST
+request.content_type application/x-www-form-urlencoded
+```
+
+## request.user
+
+- 요청을 보낸 유저 정보를 가지고 있습니다.
+
+- 비 로그인시 : request.user > Anonymous User
+- 로그인시 : request.user > id
+
+- django auth
+  - login(request, user) -> 여기 인자의 user는 auth.models.User
+  - logout(request) -> 
+  - authenticate(request, username, password)
+
+
+## Server - Session, Cookie
+- 서버의 상태 유지를 위한 두 가지 도구 입니다.
+
+- 공통점
+  - 목적: 데이터 저장 -> 사용자와 서버 사이에 원활한 통신을 위해
+
+- Session : 서버 쪽에 저장 => 보안이 필요한 정보
+- Cookie : 클라이언트 쪽에 저장 (브라우저) => 사라져도 괜찮은 정보 (가지고 있으면 편한)
+
+- HTTP통신의 특징
+  - Stateless : 요청 -> 응답 하면 끝 ==> 편리하게 상태를 유지하기위해 session, cookie를 사용합니다.
+
+- ex) 서버를 껐다 켰을 때 로그인되어있음 --> 장고에서 기본으로 설정한 세션을 사용하기 때문에 세션id가 꼐속 유지되서 그럼
+
+- 만료 조건이나 기간을 설정해서 브라우저를 닫거나 하루동안만 유지된다던가 하는식으로 개발할 수 있습니다.
+
+
+### 세션 동작
+- 세션은 서버에 있고
+- 쿠키안에 세션ID(서버에서 발급해준)를 넣어줌
+
+- 클라이언트는 http 헤더에 쿠키를 같이 넣어서 요청을 보냄
+- 서버에서는 요청을 보고 헤더에서 쿠키를 확인. 서버에서 발급한 세션 ID가 있는지 - 확인해서 로그인 되어있는지 확인할 수 있음
+
+
+## 보완하기 위한 기술 localstorage
+- 브라우저의 localstorage 는 cookie를 보완하기 위해 나온 것. 
+통신에 사용되지는 않지만 값을 저장해두고 싶을 때 사용하는 기능
+
+## 그 이외에..
+
+- JWT, OAuth를 사용할 때에는 다른 모듈을 설치해서 INSTALLED_APPS에 넣어주면 됨.
+
+??궁금?? 서버에서 세션의 동작이 궁금합니다. 세션이 생성되고 사라지는 조건, 서버에서 어떻게 활용되는지, 어떤 데이터를 가지고있는지
+
+## Server - Cache
+
+- 목적: 데이터 저장 -> 사용자와 서버 사이에 원활한 통신을 위해
+
+- Cache(저장소): 자주 사용되는(용량이 큰, 자주 바뀌지 않는) 데이터를 미리 불러와서 저장해놓는 곳
+
+- CSS, JS, image 파일들 -> 브라우저 안에 캐시 저장소 or 캐시 서버
+
+
+

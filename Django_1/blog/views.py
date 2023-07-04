@@ -38,7 +38,20 @@ class Index(View):
         }
         # print(post_objs) # Query_Set<1 ,2, 3, 4, 5>
         return render(request, 'blog/post_list.html', context)
-    
+
+
+## 로그인시 리스트를 보여줄 때, 로그인한 계정의 글만 가져오는 방법
+class IndexLogin(LoginRequiredMixin, View):
+    def get(self, request):
+        # Post-User연결(ForeignKey)
+        # User를 이용해서 Poast를 가지고 온다.
+        posts = Post.objects.filter(writer=request.user)
+        context = {
+            "posts": posts
+        }
+        return render(request, 'blog/post_list.html', context=context)
+
+
 
 # # write
 # # post - form
@@ -78,7 +91,7 @@ class Index(View):
 # 이 클래스 동작 전제가 login이 되어있어야 동작하게 됩니다.
 # 로그인 하지 않았으면 동작하지 않습니다.
 class Write(LoginRequiredMixin, View):
-    # Mixin : LoginREquiredMixin
+    # Mixin : LoginRequiredMixin
     def get(self, request):
         form = PostForm()
         context = {
@@ -102,11 +115,10 @@ class Write(LoginRequiredMixin, View):
         return render(request, 'blog/post_form.html', context=context)
 
 
-class Detail(DetailView):
-    model = Post #모델
-    template_name = 'blog/post_detail.html'
-    context_object_name = 'post' # render의 context로 넘겨줄 key 이름
-
+# class Detail(DetailView):
+#     model = Post #모델
+#     template_name = 'blog/post_detail.html'
+#     context_object_name = 'post' # render의 context로 넘겨줄 key 이름
 
 #일반 View 로 Detail다시한번..
 class DetailView(View):
@@ -115,7 +127,7 @@ class DetailView(View):
         #db에서 값 가져오기
         # 해당 글 가져오기
         post = Post.objects.get(pk=post_id)
-        # 이 글에 해당하는 댓글 가졍괴
+        # 이 글에 해당하는 댓글 가져오기
         comments = Comment.objects.filter(post=post)
         # comment 생성할 Form
         comment_form = CommentForm()
@@ -131,37 +143,71 @@ class DetailView(View):
             'comment_form' : comment_form,
             'hashtag_form': hashtag_form
         }
+        # render에서 request를 같이 전달하기 때문에 template파일에서 request를 사용할 수 있음
         return render(request, 'blog/post_detail.html', context)
 
-class Update(UpdateView):
-    model = Post
-    template_name = 'blog/post_edit.html'
-    fields = ['title', 'content'] # Post 객체의 수정할 필드
-    # success_url = reverse_lazy('blog:list') # 포스트 요청에 대한 성공
+
+# class Update(UpdateView):
+#     model = Post
+#     template_name = 'blog/post_edit.html'
+#     fields = ['title', 'content'] # Post 객체의 수정할 필드
+#     # success_url = reverse_lazy('blog:list') # 포스트 요청에 대한 성공
     
-    # initial 기능 : 업데이트시 form안에 초기값(원래 있던 값)을 템플릿에 전달하는 기능
-    def get_initial(self) -> Dict[str, Any]:
-        initial = super().get_initial() #UpdateView에서 제공하는 get_initial().리턴이 dictionary 형태
-        post = self.get_object() # pk 기반으로 객체를 가져옵니다.
-        initial['title'] = post.title
-        initial['content'] = post.content
-        return initial
+#     # initial 기능 : 업데이트시 form안에 초기값(원래 있던 값)을 템플릿에 전달하는 기능
+#     def get_initial(self) -> Dict[str, Any]:
+#         initial = super().get_initial() #UpdateView에서 제공하는 get_initial().리턴이 dictionary 형태
+#         post = self.get_object() # pk 기반으로 객체를 가져옵니다.
+#         initial['title'] = post.title
+#         initial['content'] = post.content
+#         return initial
     
-    # post 요청 성공 시 수행할 메서드
-    def get_success_url(self): 
-        post = self.get_object()
-        # 함수에서 사용하므로 reverse() 사용
-        return reverse('blog:detail', kwargs={'pk': post.pk}) #reverse를 사용하면 url에 값을 전달해줄수있음
+#     # post 요청 성공 시 수행할 메서드
+#     def get_success_url(self): 
+#         post = self.get_object()
+#         # 함수에서 사용하므로 reverse() 사용
+#         return reverse('blog:detail', kwargs={'pk': post.pk}) #reverse를 사용하면 url에 값을 전달해줄수있음
     
-    # 이것도 많이 사용합니다.
-    # def get_absolute_url(self):
+#     # 이것도 많이 사용합니다.
+#     # def get_absolute_url(self):
+class Update(View):
+    def get(self, request, pk): # pk = post_id
+        post = Post.objects.get(pk=pk)
+        form = PostForm(initial={'title': post.title, 'content':post.content})
+        context = {
+            'form': form,
+            'post': post
+        }
+        return render(request, 'blog/post_edit.html', context=context)
+        
+    def post(self, request, pk):
+        post = Post.objects.get(pk=pk)
+        form = PostForm(request.POST)
+        if form.is_valid():
+            post.title = form.cleaned_data['title']
+            post.content = form.cleaned_data['content']
+            post.save()
+            return redirect('blog:detail', post_id=pk)
+        
+        form.add_error(None, '폼이 유효하지 않습니다.')
+        context ={
+            'form':form
+        }
+        return render(request, 'blog/form_error.html', context=context)
 
 
-class Delete(DeleteView):
-    model = Post
-    success_url = reverse_lazy('blog:list')
-
+# class Delete(DeleteView):
+#     model = Post
+#     success_url = reverse_lazy('blog:list')
 ## generic view의 편한점은 post요청이 아니면 자동으로 화면이동(get)으로 처리해줌
+class Delete(View):
+    def post(self, request, pk):
+        post = Post.objects.get(pk=pk)
+        post.delete()
+        return redirect('blog:list')
+    
+    # 클래스 자체에 아예 접근하지 못하게 하려면 -> LoginRequiredmixin
+    # Login이 되었을 때 삭제 버튼이 보이게 (템플릿에서 처리)
+
 
 ### Comment
 class CommentWrite(View):
@@ -178,14 +224,23 @@ class CommentWrite(View):
             content = form.cleaned_data['content']
             post = Post.objects.get(pk=post_id)
             
+            # 유저 정보 가져오기
+            writer = request.user
+            
             # 댓글객체 생성. db에 접근해서 create()로 할 경우 .save()를 안해도 됨
-            # 크래스로 생성할 경우에는 생성된 instance에 .save()를 해줘야 함
-            comment = Comment.objects.create(post=post, content=content)
+            # 모델 클래스로 생성할 경우에는 생성된 instance에 .save()를 해줘야 함
+            comment = Comment.objects.create(post=post, content=content, writer=writer)
             return redirect('blog:detail', post_id=post_id)
+        
+        form.add_error(None, '폼이 유효하지 않습니다.')
+        context = {
+            'form': form
+        }
+        return render(request, 'blog/form_error.html', context=context)
 
 
 class CommentDelete(View):
-    def post(self, request, pk):
+    def post(self, request, pk): # pk는 comment_id
         comment = Comment.objects.get(pk=pk)
         ## 상세 페이지로 돌아가기 위한 post id 접근 (삭제하기 전에 해야됨)
         post_id = comment.post.id
@@ -202,13 +257,21 @@ class HashTagWrite(View):
             name = form.cleaned_data['name']
             #post
             post = Post.objects.get(pk=post_id)
-            hashtag = HashTag.objects.create(post=post, name=name)
+            #작성자정보 가져오기
+            writer = request.user
+            hashtag = HashTag.objects.create(post=post, name=name, writer=writer)
             return redirect('blog:detail', post_id=post_id)
         
-            
+        form.add_error(None, '폼이 유효하지 않습니다.')
+        context = {
+            'form':form
+        }
+        return render(request, 'blog/form_error.html', context=context)
+
+
 class HashTagDelete(View):
     def post(self, request, tag_id):
         hashtag = HashTag.objects.get(pk=tag_id)
-        post_id = hashtag.post.id
+        post_id = hashtag.post.id # 태그가 달린 post를 찾아서 redirect
         hashtag.delete()
         return redirect('blog:detail', post_id=post_id)
