@@ -421,8 +421,9 @@ def index(request):
 6. block 과 extends
   - 아래 절에서 자세히 설명합니다.
 ```html
-{% extends base.html %}
+{% extends 'base.html' %}
 {% block content %}
+  ...
 {% endblock %}
 ```
 
@@ -433,7 +434,7 @@ def index(request):
 ```
 
 
-### 템플릿 태그 추가 with
+### 템플릿 태그 with
 
 - 템플릿에서 context로 전달받은 변수를 다른 이름으로 변경해서 사용하고 싶을 때 쓰는 템플릿 태그입니다.
 
@@ -448,7 +449,7 @@ def index(request):
 
 - 폼에 대한 에러를 처리할 때 `form_error.html`하나로 처리하는데, comment_form과 hashtag_form에 대한 에러를 한 번에 처리하기 위해서 `with`를 사용했습니다.
 
-- `form_error.html`에서는 전달된 form 변수명이 `form`하나이므로 해당 파일을 include 하기 전에 form에다가 comment_form, hashtag_form을 with로 지정해주었습니다.
+- `form_error.html`에서는 전달된 form 변수명이 `form`이므로 해당 파일을 include 하기 전에 form에다가 comment_form, hashtag_form을 with로 지정해주었습니다.
 
 ```html
 <!-- post_detail.html -->
@@ -735,6 +736,46 @@ def write(request):
 {% endblock %}
 
 ```
+
+### 생성한 폼에 에러 추가 add_error() : forms.py
+
+- 데이터를 입력받기 위해 views.py에 생성한 폼을 전달하고 is_valid() 함수로 유효성을 검사합니다.
+
+- 그런데 form이 유효하지 않은 경우에 어떤 에러가 발생했는지 표시를 해주기 위한 기능이 있습니다.
+
+- 그것은 바로 add_error()라는 함수입니다.
+
+> form.add_error('field name', 'error 내용') 으로 작성합니다.
+
+- add_error로 추가된 에러 내용은 template에서 form을 출력하면 표기됩니다.
+- 또한 field를 지정하지 않으려면 None으로 하면 됩니다.
+- field는 전달할 db table의 column이름 중 하나입니다.
+- 예를들어 댓글(comment) 이라면 post_id, content, writer 가 필드로 들어갈 수 있습니다.
+
+```python
+
+class CommentWrite(View):
+    def post(self, request, post_id):
+        post = Post.objects.get(pk=post_id)
+        form = CommentForm(request.POST)
+        hform = HashTagForm()
+        
+        if form.is_valid():
+            ...
+            return redirect('blog:detail', post_id=post_id)
+        
+        # 유효하지 않다면 여기로 나와서 add_error를 수행함
+        form.add_error(None,'폼이 유효하지 않습니다.')
+        context = {
+            'title': 'Blog',
+            ...
+        }
+        return render(request, 'blog/post_detail.html', context=context)
+
+```
+
+
+
 
 
 ## backend - frontend 통신 : API
@@ -1075,6 +1116,16 @@ class User(AbstractUser):
 AUTH_USER_MODEL = 'user.User'
 ```
 
+- User 모델을 사용할 곳에 아래와 같이 import하고, User를 사용하면 됨
+
+```python
+# blog.models.py
+from django.contrib.auth import get_user_model
+
+## auth를 확장된 모델을 가져오게 됩니다.
+User = get_user_model()
+```
+
 ## Auth 활용한 Form 개발 : forms.py
 
 - Auth 기능을 활용한 객체를 form을 통해 입력/확인하고 싶을때 Auth의 form을 사용해야 합니다.
@@ -1196,7 +1247,7 @@ class Write(LoginRequiredMixin, View):
 
 ```
 
-- `LoginRequiredMixin`을 통과하지 못하면 `settings.py` 안에 있는 `login_url` 경로로 사용자를 보내줍니다. 
+- `LoginRequiredMixin`을 통과하지 못하면 `settings.py` 안에 있는 `LOGIN_URL` 경로로 사용자를 보내줍니다. 
 - 이 부분은 아직 `settings.py`에 해당 상수를 설정하지 않았기 때문에 설정이 안 된 상태입니다.
 - 만약 다른 경로로 보내주고 싶으면 `LoginRequiredMixin` 을 상속한 클래스 안에서 `redirect_filed_name`을 설정해줘서 다른 경로로 보내줄 수 있습니다.
 
@@ -1225,7 +1276,15 @@ class Write(LoginRequiredMixin, View):
 LOGIN_URL = '/user/login'
 ```
 
+- 만약 `LoginRequiredMixin`를 통과하지 못했을 때 다음 경로를 다른 경로로 지정해주고 싶을 때는 해당 클래스로 접근하는 동작이 일어나는 화면 속 GET 요청의 render 부분에서 아래와 같이 작성합니다.
 
+- 
+
+```html
+<input type=hidden name=“next” value=“{{ request.get_full_path }}”>
+```
+
+- 이런식으로 input에서 next 같은 이름으로 보내줄 경로를 입력해주면 다음 POST 요청에서 해당 값을 이용해서(next_url 키워드) 원하는 경로로 보내줄 수 있습니다.
 
 ---
 

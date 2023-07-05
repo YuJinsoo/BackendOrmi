@@ -95,7 +95,7 @@ class IndexLogin(LoginRequiredMixin, View):
 class Write(LoginRequiredMixin, View):
     # Mixin : LoginRequiredMixin -> 로그인 되어있지 않은 사용자는 로그인페이지로 보내줌
     # login_url ='/user/login' 개별적으로 입력. settings.py에 LOGIN_URL 설정가능 
-    # redirect_field_name = '경로' #로그인 페이지 말고 다른데로 보내주고 싶을때
+    # redirect_field_name = 'name' #로그인 페이지 말고 다른데로 보내주고 싶을때
     
     def get(self, request):
         form = PostForm()
@@ -245,7 +245,7 @@ class CommentWrite(View):
             return redirect('blog:detail', post_id=post_id)
         
         ## 첫번째 인자로 form의 필드를 지정할 수 있음. None 대신 'content'
-        form.add_error(None,'폼이 유효하지 않습니다.')
+        form.add_error('content','폼이 유효하지 않습니다.')
         context = {
             'title': 'Blog',
             'post': post,
@@ -282,7 +282,7 @@ class HashTagWrite(View):
             hashtag = HashTag.objects.create(post=post, name=name, writer=writer)
             return redirect('blog:detail', post_id=post_id)
         
-        form.add_error(None, '폼이 유효하지 않습니다.')
+        form.add_error('name', '폼이 유효하지 않습니다.')
         context = {
             'title': 'Blog',
             'post': post,

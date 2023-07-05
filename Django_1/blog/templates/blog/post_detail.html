@@ -27,7 +27,7 @@
     <form action="{% url 'blog:tag-write' post_id=post.pk%}" method="post">
         {% csrf_token %}
         {% if hashtag_form.errors %}
-            {% with form=hashtag_form%}
+            {% with form=hashtag_form %}
             {% include 'blog/form_error.html' %}
             {% endwith %}
         {% else %}

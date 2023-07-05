@@ -9,13 +9,30 @@
 
 <div class="alert alert-danger">
     <ul>
+        {% for f in form %}
+            {% for error in f.errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+            {{f.label_tag}}
+            {{f}}
+        {%endfor%}
+        
+        {% comment %}
+        {% for k in form.errors.keys %}
+            {{ k|upper }}
+        {% endfor %}
+
         {% for errors in form.errors.values %}
             {% for error in errors %}
                 <li>{{error}}</li>
             {% endfor %}
         {% endfor %}
+
+        {% for f in form %}
+            {{f}}
+        {% endfor %}
+        {% endcomment %}
     </ul>
-    {{ form }}
 </div>
 
 
