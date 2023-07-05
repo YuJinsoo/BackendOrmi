@@ -17,10 +17,14 @@ from .forms import RegisterForm, LoginForm
 ### Registration
 class Registration(View):
     def get(self, request):
+        if request.user.is_authenticated:
+            return redirect('blog:list')
+        
         # 회원가입 페이지 - 정보를 입력할 form 보여주어야 합니다.
         form = RegisterForm()
         context = {
             'form': form,
+            'title': 'User'
         }
         return render(request, 'user/user_register.html', context=context)
     
@@ -29,11 +33,14 @@ class Registration(View):
         
         # request의 post요청에 들어간 정보가 들어간걸 생성
         form = RegisterForm(request.POST)
+        print(form.is_valid())
+        print(form.errors)
         if form.is_valid(): # form의 유효성검사
             user = form.save()
             # 로그인 한다음 이동해도 됨
         
-        return redirect('blog:list')
+        # return redirect('blog:list')
+        return redirect('user:login')
 
 
 class Login(View):
@@ -46,7 +53,8 @@ class Login(View):
         
         form = LoginForm()
         context = {
-            'form':form
+            'form':form,
+            'title': 'User'
         }
         return render(request, 'user/user_login.html', context=context)
     
@@ -57,10 +65,10 @@ class Login(View):
         if request.user.is_authenticated:
             return redirect('blog:list')
         
-        form = LoginForm(request.POST)
+        form = LoginForm(request, request.POST)
         if form.is_valid():
             # form안에 있는 값을 가져올때는 cleand_data[key]
-            email = form.cleaned_data['email']
+            email = form.cleaned_data['username'] # 폼에서는 username을 보내줌... why? 폼에서 widget으로 이름 바꿔줄 수 있음.
             password = form.cleaned_data['password']
             
             # authenticate를 사용하지 않는다면
@@ -68,7 +76,7 @@ class Login(View):
             
             # models.py에 USERNAME_FIELD, REQUIRED_FIELDS 설정필요
             # 등록된 유저면 True, 없으면 False가 리턴됨
-            user = authenticate(username=email, password=password)
+            user = authenticate(username=email, password=password) # 아이디, 패스워드
             
             if user:
                 login(request, user)
@@ -78,7 +86,8 @@ class Login(View):
             form.add_error(None, '아이디가 없습니다.')
         
         context = {
-            'form': form ## 에러가 들어간 폼
+            'form': form, ## 에러가 들어간 폼
+            'title': 'User'
         }
         return render(request, 'user/user_login.html', context=context)
     

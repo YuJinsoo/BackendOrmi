@@ -43,6 +43,7 @@ class UserManager(BaseUserManager):
 class User(AbstractUser):
     # email 이 중복되면 안되는 옵션. unique
     # 한 테이블에 unique는 1개만 있을 수 있습니다.
+    username = None # username으로 인한 오류 방지. email을 아이디로 쓸거라 그럼.
     email = models.EmailField(unique=True, max_length=255)
     
     # null과 blank 허용. 보통 둘다 사용함

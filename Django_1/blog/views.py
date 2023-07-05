@@ -35,6 +35,7 @@ class Index(View):
         # context = DB에서 가져온 값
         context = {
             "posts": post_objs,
+            'title': 'Blog'
         }
         # print(post_objs) # Query_Set<1 ,2, 3, 4, 5>
         return render(request, 'blog/post_list.html', context)
@@ -47,7 +48,8 @@ class IndexLogin(LoginRequiredMixin, View):
         # User를 이용해서 Poast를 가지고 온다.
         posts = Post.objects.filter(writer=request.user)
         context = {
-            "posts": posts
+            "posts": posts,
+            'title': 'Blog'
         }
         return render(request, 'blog/post_list.html', context=context)
 
@@ -91,11 +93,15 @@ class IndexLogin(LoginRequiredMixin, View):
 # 이 클래스 동작 전제가 login이 되어있어야 동작하게 됩니다.
 # 로그인 하지 않았으면 동작하지 않습니다.
 class Write(LoginRequiredMixin, View):
-    # Mixin : LoginRequiredMixin
+    # Mixin : LoginRequiredMixin -> 로그인 되어있지 않은 사용자는 로그인페이지로 보내줌
+    # login_url ='/user/login' 개별적으로 입력. settings.py에 LOGIN_URL 설정가능 
+    # redirect_field_name = '경로' #로그인 페이지 말고 다른데로 보내주고 싶을때
+    
     def get(self, request):
         form = PostForm()
         context = {
-            'form': form
+            'form': form,
+            'title': 'Blog'
         }
         return render(request, 'blog/post_form.html', context=context)
     
@@ -110,7 +116,8 @@ class Write(LoginRequiredMixin, View):
         
         form.add_error(None, '폼이 유효하지 않습니다.')
         context = {
-            'form': form
+            'form': form,
+            'title': 'Blog'
         }
         return render(request, 'blog/post_form.html', context=context)
 
@@ -141,7 +148,8 @@ class DetailView(View):
             'comments' : comments,
             'hashtags' : hashtags,
             'comment_form' : comment_form,
-            'hashtag_form': hashtag_form
+            'hashtag_form': hashtag_form,
+            'title': 'Blog'
         }
         # render에서 request를 같이 전달하기 때문에 template파일에서 request를 사용할 수 있음
         return render(request, 'blog/post_detail.html', context)
@@ -175,7 +183,8 @@ class Update(View):
         form = PostForm(initial={'title': post.title, 'content':post.content})
         context = {
             'form': form,
-            'post': post
+            'post': post,
+            'title': 'Blog'
         }
         return render(request, 'blog/post_edit.html', context=context)
         
@@ -190,7 +199,8 @@ class Update(View):
         
         form.add_error(None, '폼이 유효하지 않습니다.')
         context ={
-            'form':form
+            'form':form,
+            'title': 'Blog'
         }
         return render(request, 'blog/form_error.html', context=context)
 
@@ -214,7 +224,10 @@ class CommentWrite(View):
     # def get(self, request):
     #     pass
     def post(self, request, post_id):
+        post = Post.objects.get(pk=post_id)
         form = CommentForm(request.POST)
+        hform = HashTagForm()
+        
         if form.is_valid():
             # cleaned_data[field]로 가지고와야 폼에 있는 값이 정확하게 가져와집니다.
             # 폼이 유효하다면
@@ -222,7 +235,6 @@ class CommentWrite(View):
             # 2. 댓글을 달 게시물을 지정해줌
             # 이걸 왜하나? 댓글 객체를 생성하기 위해서
             content = form.cleaned_data['content']
-            post = Post.objects.get(pk=post_id)
             
             # 유저 정보 가져오기
             writer = request.user
@@ -232,11 +244,17 @@ class CommentWrite(View):
             comment = Comment.objects.create(post=post, content=content, writer=writer)
             return redirect('blog:detail', post_id=post_id)
         
-        form.add_error(None, '폼이 유효하지 않습니다.')
+        ## 첫번째 인자로 form의 필드를 지정할 수 있음. None 대신 'content'
+        form.add_error(None,'폼이 유효하지 않습니다.')
         context = {
-            'form': form
+            'title': 'Blog',
+            'post': post,
+            'comments' : post.comment_set.all(),
+            'hashtags' : post.hashtag_set.all(),
+            'comment_form': form,
+            'hashtag_form': hform
         }
-        return render(request, 'blog/form_error.html', context=context)
+        return render(request, 'blog/post_detail.html', context=context)
 
 
 class CommentDelete(View):
@@ -252,11 +270,13 @@ class CommentDelete(View):
 ### HashTag
 class HashTagWrite(View):
     def post(self, request, post_id):
+        #post
+        post = Post.objects.get(pk=post_id)
         form = HashTagForm(request.POST)
+        cform = CommentForm()
+        
         if form.is_valid():
             name = form.cleaned_data['name']
-            #post
-            post = Post.objects.get(pk=post_id)
             #작성자정보 가져오기
             writer = request.user
             hashtag = HashTag.objects.create(post=post, name=name, writer=writer)
@@ -264,9 +284,14 @@ class HashTagWrite(View):
         
         form.add_error(None, '폼이 유효하지 않습니다.')
         context = {
-            'form':form
+            'title': 'Blog',
+            'post': post,
+            'comments': post.comment_set.all(),
+            'hashtags': post.hashtag_set.all(),
+            'comment_form': cform,
+            'hashtag_form': form
         }
-        return render(request, 'blog/form_error.html', context=context)
+        return render(request, 'blog/post_detail.html', context=context)
 
 
 class HashTagDelete(View):

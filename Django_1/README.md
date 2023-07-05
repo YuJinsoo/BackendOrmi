@@ -354,6 +354,8 @@ urlpatterns = [
 from django.views.generic import ListView, CreateView, DetailView 
 ```
 
+---
+
 
 ## template
 - 전체 프로젝트에 영향이 가는걸 변경했으면 항상 setting 에 가서 적용해야합니다.
@@ -431,6 +433,99 @@ def index(request):
 ```
 
 
+### 템플릿 태그 추가 with
+
+- 템플릿에서 context로 전달받은 변수를 다른 이름으로 변경해서 사용하고 싶을 때 쓰는 템플릿 태그입니다.
+
+```html
+<!-- context = {'post':post} -->
+
+{% with new_post = post %}
+    <!-- 이 구간에서 -->
+    <!-- new_post 는 post와 동일합니다. -->
+{% endwith %}
+```
+
+- 폼에 대한 에러를 처리할 때 `form_error.html`하나로 처리하는데, comment_form과 hashtag_form에 대한 에러를 한 번에 처리하기 위해서 `with`를 사용했습니다.
+
+- `form_error.html`에서는 전달된 form 변수명이 `form`하나이므로 해당 파일을 include 하기 전에 form에다가 comment_form, hashtag_form을 with로 지정해주었습니다.
+
+```html
+<!-- post_detail.html -->
+<h3>해시태그</h3>
+    <form action="{% url 'blog:tag-write' post_id=post.pk%}" method="post">
+        {% csrf_token %}
+        {% if hashtag_form.errors %}
+            {% with form=hashtag_form%}
+            {% include 'blog/form_error.html' %}
+            {% endwith %}
+        {% else %}
+            {{ hashtag_form.name }}
+        {% endif %}
+        
+        <input type="submit" class="btn btn-dark" value="태그생성">
+    </form>
+```
+
+```html
+<!-- form_error.html -->
+<div class="alert alert-danger">
+    <ul>
+        {% for errors in form.errors.values %}
+            {% for error in errors %}
+                <li>{{error}}</li>
+            {% endfor %}
+        {% endfor %}
+    </ul>
+    {{ form }}
+</div>
+
+```
+
+
+
+### Django Template Engine의 변수 필터 활용
+
+- 템플릿에서 변수 필터를 사용하려면 `{{ value|filter:parameter }}` 이와 같은 양식으로 사용합니다.
+``` html
+<!-- 필터 적용 -->
+{{ value|filter }}
+
+<!-- 여러 필터 적용 -->
+{{ value|filter1|filter2 }}
+```
+
+- 템플릿 태그와 함께 사용할 경우에는 `{{ template_tag|filter:parameter }}` 이와 같이 사용할 수 있습니다.
+- 필터에 매개변수를 전달하려면 `{{ value|filter:”parameter” }}` 이렇게 사용해야 합니다.
+내장 필터 종류에는 upper, lower, length, default, join, slice 등이 있습니다.
+
+- 예제
+```html
+<!--join -->
+# ['a','b','c'] -> "a // b // c"
+{{ value|join:" // " }}
+```
+
+```html
+<!-- add -->
+# value가 4면 6이 나옴
+{{ value|add:"2" }}
+# first가 [1,2,3] second가 [4,5,6] = [1,2,3,4,5,6]이 나옴
+{{ first|add:second }}
+```
+
+```html
+<!-- cut -->
+# value = 'ab c d'
+# 'ab c d' -> 'abcd'
+{{ value|cur:" " }}
+```
+
+- 여러가지 필터 기능들이 있습니다. : 
+
+
+
+
 ### 탬플릿 파일을 쪼개서 개발하기
 
 - {% block content %} / {% endblock %} 과 {% extends filename %} {% include filename %} 태그를 통해 템플릿 파일들을 조립하듯이 사용할 수 있습니다.
@@ -469,6 +564,103 @@ def index(request):
 </form>
 {% endblock %}
 ```
+
+## 프로젝트 공용 template 만들기
+
+- 여러 앱에서 공통으로 사용하는 부분 (예를 들어 헤더, 푸터, 게이트페이지) 등은 헷갈리지 않고 참조하기 쉽도록 프로젝트 템플릿을 만들어 둘 수 있습니다.
+
+- 프로젝트폴더와 같은 경로에 `templates`라는 폴더를 생성하고, `settings.py`에 기본 템플릿 경로를 등록해줍니다. (app(프로젝트), blog, user 폴더와 함께 template 폴더가 있음)
+
+- `TEMPLATES` 의 `DIRS`에 경로를 아래와 같이 설정해줍니다.
+- 이렇게 설정하면 템플릿 파일에서 가장 베이스 경로로 설정됩니다.
+```python
+# setting.py
+TEMPLATES = [
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [BASE_DIR / "templates"], # Django_1/templates
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+            ],
+        },
+    },
+]
+```
+
+### 프로젝트 공용 template 파일 작성
+
+- 공용 템플릿 파일을 작성하는데, title은 페이지를 렌더링할 때 context로 전달받아 입력할 수 있도록 구분해줍니다. (block을 사용해서)
+
+- 로그인 상태일 때에는 로그아웃, 로그아웃 상태일 때에는 로그인 버튼이 보이도록 만들었습니다.
+
+- 로그인 상태일 경우 어떤 유저가 로그인했는지 확인할 수 있도록 id(email)를 표시했습니다.
+```html
+<!-- base.html -->
+<!DOCTYPE html>
+<html lang="ko-KR">
+  <head>
+    ...
+    <title>
+        {% block title %}
+            {{ title }}
+        {% endblock %}
+    </title>
+  </head>
+  <body>
+    <div class="container">
+      {% if user.is_authenticated %}
+      <p>Welcome, {{ user.email }}</p>
+      <a href="{% url 'user:logout' %}" class="btn btn-primary">Logout</a>
+      {% else %}
+      <p>Please, Login</p>
+      <a href="{% url 'user:login' %}" class="btn btn-primary">Login</a>
+      {% endif %}
+      <h1>Blog</h1>
+      {% block content %}
+      {% endblock %}
+    </div>
+
+    ...
+  </body>
+</html>
+```
+
+### 프로젝트 공용 템플릿 파일 사용하기
+
+- `blog` 앱의 게시물들을 확인하는 `post_list.html`를 확인해보겠습니다.
+- extends를 아무런 베이스 경로 없이 `base.html`로 불러와서 상속할 수 있게 되었습니다. (다른 앱에 있는 템플릿을 쓸 때에는 `앱이름/파일`로 사용해야 합니다.)
+
+```html
+<!-- post_list.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<p>블로그 게시판 첫 화면입니다.</p>
+```
+
+- 또한 blog 의 views.py 에 title을 넘겨주는 부분을 추가해야 합니다.
+- 왜냐하면 `base.html`의 title 부분은 정해지지 않고, 전달받아서 렌더링하기 때문입니다.
+
+```python
+## blog/view.py
+class Index(View):
+    def get(self, request):
+        post_objs = Post.objects.all()
+        context = {
+            "posts": post_objs,
+            'title': 'Blog' ## title에 들어갈 값을 text로 전달해줍니다.
+        }
+        return render(request, 'blog/post_list.html', context)
+```
+
+
+---
+
 
 ## forms.py
 
@@ -844,11 +1036,16 @@ class UserManager(BaseUserManager):
 
 ```
 
-- 또한 모델에 USERNAME_FIELD, EMAIL_FIELD, REQUIRED_FIELDS 를 설정하고, 변경한 `BaseUserManager`를 적용합니다.
+- `User` 모델에 USERNAME_FIELD, EMAIL_FIELD, REQUIRED_FIELDS 를 설정하고, 변경한 `BaseUserManager`를 object로 적용합니다.
+- 그리고 우리 프로젝트에서 username은 사용하지 않을 것이기 때문에 `username = None`으로 설정해 주어야 username이라는 column이 생성되지 않습니다.
+
+> `username`이 생성되어버리면 로그인 폼(AuthenticationForm 을 상속한) 에서 유저를 확인할 때 `username`을 우선적으로 확인합니다.
+> 그런데 회원가입을 할 때 이메일만 등록하고 `username`은 없는 상태이기 때문에 로그인이 되지 않습니다.
 
 ```python
 # model
 class User(AbstractUser):
+    username = None # username으로 인한 오류 방지. email을 아이디로 쓸거라 그럼.
     email = models.EmailField(unique=True, max_length=255)
     name = models.CharField(max_length=50, null=True, blank=True)
 
@@ -865,9 +1062,10 @@ class User(AbstractUser):
     
     # BaseUserManager를 오버라이드한 클래스UserManager를 설정해줍니다.
     objects = UserManager()
+
 ```
 
-### 다른 앱에서도 auth 유저를 사용하기
+### 다른 앱에서도 auth 적용한 유저를 사용하기
 
 - settings.py에 아래와 같이 경로를 등록해주어야 합니다.
 - `user` 앱에 `User` 모델을 다른 앱에서 사용하도록 등록한 것입니다.
@@ -898,6 +1096,7 @@ User = get_user_model()
 
 - `UserCreationForm`, `AuthenticationForm`를 상속해서 Form을 만들어줍니다.
 - `AbstractUser`에서 필수인 부분을 자동으로 전달하므로 fields를 설정할 필요가 없습니다. 다만 아이디로 사용하려고 했던 `email`은 필수가 아니기 때문에 아래와 같이 추가해주어야 합니다.
+
 ```python
 # user.forms.py
 class RegisterForm(UserCreationForm):
@@ -907,11 +1106,33 @@ class RegisterForm(UserCreationForm):
         # 필수부분만 자동으로 하기 때문에 email도 추가함
         fields = UserCreationForm.Meta.fields + ('email',)
 
+class LoginForm(AuthenticationForm):
+    
+    class Meta():
+        model = User
+
+```
+
+- 하지만, 진행한 프로젝트에서는 아이디인 `username`이 없고 대신 `eamil`을 사용합니다.
+- 그런데 `UserCreationForm`을 상속하면 기본적으로 `username`이 생성되기 때문에 사용할 필드를 직접 지정해주어야 합니다.
+
+```python
+# user.forms.py
+class RegisterForm(UserCreationForm):
+    
+    class Meta():
+        model = User
+        # 필수부분만 자동으로 하기 때문에 email도 추가함
+        # fields = UserCreationForm.Meta.fields + ('email',)
+        # UserCreationForm, AuthenticationForm에는 username을 사용해버리기 때문에 fields를 지정
+        fields = ['email']
 
 class LoginForm(AuthenticationForm):
     
     class Meta():
         model = User
+        fields = ['email', 'password']
+
 ```
 
 
@@ -979,10 +1200,35 @@ class Write(LoginRequiredMixin, View):
 - 이 부분은 아직 `settings.py`에 해당 상수를 설정하지 않았기 때문에 설정이 안 된 상태입니다.
 - 만약 다른 경로로 보내주고 싶으면 `LoginRequiredMixin` 을 상속한 클래스 안에서 `redirect_filed_name`을 설정해줘서 다른 경로로 보내줄 수 있습니다.
 
+- views.py에 설정하는 방법
+
+```python
+# blog.view.py
+
+class Write(LoginRequiredMixin, View):
+    # Mixin : LoginRequiredMixin -> 로그인 되어있지 않은 사용자는 로그인페이지로 보내줌
+    login_url ='/user/login' # 개별적으로 입력.
+    
+    def get(self, request):
+        ...
+        pass
+    
+    def post(self, request):
+        ...
+        pass
+```
+
+- settings.py에 설정하는 방법
+```python
+# settings.py
+# Login URL
+LOGIN_URL = '/user/login'
+```
 
 
 
 ---
+
 
 # request
 - views.py에는 클라이언트에서 요청한 http형식 request가 전달됩니다.

@@ -1,12 +1,33 @@
 <!-- form error 출력 -->
+{% comment %}
+{% if comment_form.errors %}
+    {{ form = comment_form}}
+{% else %}
+    {{ form = hashtag_form}}
+{% endif %}
+{% endcomment %}
 
 <div class="alert alert-danger">
     <ul>
         {% for errors in form.errors.values %}
             {% for error in errors %}
                 <li>{{error}}</li>
-            {% endfor % }
-        {% endfor % }
+            {% endfor %}
+        {% endfor %}
     </ul>
+    {{ form }}
 </div>
 
+
+
+{% comment %}
+<!-- form error 출력 -->
+<div class="alert alert-danger">
+    <ul>
+        {% for error in comment_form.content.errors %}
+            <li>{{ error }}</li>
+        {% endfor %}
+        {{ comment_form }}
+    </ul>
+</div>
+{% endcomment %}

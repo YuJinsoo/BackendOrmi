@@ -8,5 +8,8 @@ def index(request):
 
 class IndexMain(View):
     def get(self, request):
-        return render(request, 'index.html')
+        context = {
+            'title': 'Index'
+        }
+        return render(request, 'index.html', context=context)
         
