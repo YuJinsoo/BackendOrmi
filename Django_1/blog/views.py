@@ -275,6 +275,7 @@ class Delete(View):
 
 
 ### Comment
+## TODO - 댓글 달려면 로그인창 > 이후 다시 상세페이지. 권한? 물어보기
 class CommentWrite(LoginRequiredMixin, View):
     # def get(self, request):
     #     pass
@@ -283,9 +284,8 @@ class CommentWrite(LoginRequiredMixin, View):
     1. LoginRequiredMixin -> 삭제
     2. 비회원 유저 권한 User
     '''
-    redirect_field_name = "next"
-    
     def post(self, request, post_id):
+        
         form = CommentForm(request.POST)
         hform = HashTagForm()
         

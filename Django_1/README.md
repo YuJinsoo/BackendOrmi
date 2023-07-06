@@ -1335,6 +1335,18 @@ request.content_type application/x-www-form-urlencoded
   - authenticate(request, username, password)
 
 
+## request에서 알아야 하는 것.
+
+- `FILES`, `GET`, `POST`
+
+### POST
+
+- 아래와 같이 post로 보낸 csrf토큰값, 폼에서 input으로 받은 name과 value를 key:value로 가지고 있습니다.
+
+```python
+<QueryDict: {'csrfmiddlewaretoken': ['PeTb3GWNutfBXUcgCcRxf9xtCcKiOCTA6oyskB4R3hVRF84mNsEqA652TVCo6pUY'], 'content': ['aaaa'], 'index': ['2']}>
+```
+
 ## Server - Session, Cookie
 - 서버의 상태 유지를 위한 두 가지 도구 입니다.
 

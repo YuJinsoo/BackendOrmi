@@ -51,10 +51,16 @@ class Login(View):
         if request.user.is_authenticated:
             return redirect('blog:list')
         
+        togo = None
+        
+        if "next" in request.GET.keys() :
+            togo = "/"+"/".join(request.GET["next"].split("/")[1:4])
+        
         form = LoginForm()
         context = {
             'form':form,
-            'title': 'User'
+            'title': 'User',
+            'togo': togo
         }
         return render(request, 'user/user_login.html', context=context)
     
@@ -62,11 +68,6 @@ class Login(View):
         ## 추가
         # 먼저 로그인이 되어 있는 경우 바로 return 해줌
         # 유저 정보가 request에 있으면 로그인이 되어있는것
-        
-
-        print(request.POST)
-        print(request.get_full_path)
-
         
         if request.user.is_authenticated:
             return redirect('blog:list')
@@ -86,6 +87,10 @@ class Login(View):
             
             if user:
                 login(request, user)
+                
+                if request.POST["next"] != "None" :
+                    return redirect(request.POST["next"])
+                
                 return redirect('blog:list')
             
             # 폼에 에러를 추가해줍니다.
