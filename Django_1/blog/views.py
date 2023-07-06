@@ -204,6 +204,7 @@ class DetailView(View):
         #     'hashtag_form': hashtag_form,
         #     'title': 'Blog'
         # }
+
         # render에서 request를 같이 전달하기 때문에 template파일에서 request를 사용할 수 있음
         return render(request, 'blog/post_detail.html', context)
 
@@ -274,7 +275,7 @@ class Delete(View):
 
 
 ### Comment
-class CommentWrite(View):
+class CommentWrite(LoginRequiredMixin, View):
     # def get(self, request):
     #     pass
     
@@ -282,6 +283,8 @@ class CommentWrite(View):
     1. LoginRequiredMixin -> 삭제
     2. 비회원 유저 권한 User
     '''
+    redirect_field_name = "next"
+    
     def post(self, request, post_id):
         form = CommentForm(request.POST)
         hform = HashTagForm()
@@ -304,10 +307,8 @@ class CommentWrite(View):
             try:
                 # 댓글객체 생성. db에 접근해서 create()로 할 경우 .save()를 안해도 됨
                 # 모델 클래스로 생성할 경우에는 생성된 instance에 .save()를 해줘야 함
+                # 있는 값. unique 값이 중복이면 에러
                 comment = Comment.objects.create(post=post, content=content, writer=writer)
-                
-                # 있는 값. unique 값이 중복
-                
                 
             # 외래키 --> ObjectDoesNoeExist (post 없을 때)
             except ObjectDoesNotExist as e:
@@ -324,12 +325,13 @@ class CommentWrite(View):
         context = {
             'title': 'Blog',
             'post': post,
-            'comments' : post.comment_set.all(),
+            'comments' : post.post_comment.all(),
             'hashtags' : post.hashtag_set.all(),
             'comment_form': form,
             'hashtag_form': hform
         }
         return render(request, 'blog/post_detail.html', context=context)
+
 
 
 class CommentDelete(View):

@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse
-from django.views import View #일반 뷰 임포트
+from django.views import View # 뷰 임포트
 from django.contrib.auth import authenticate, login, logout
 
 # from .models import User ## from django.contrib.auth import get_user_model
@@ -33,8 +33,8 @@ class Registration(View):
         
         # request의 post요청에 들어간 정보가 들어간걸 생성
         form = RegisterForm(request.POST)
-        print(form.is_valid())
-        print(form.errors)
+        # print(form.is_valid())
+        # print(form.errors)
         if form.is_valid(): # form의 유효성검사
             user = form.save()
             # 로그인 한다음 이동해도 됨
@@ -62,6 +62,12 @@ class Login(View):
         ## 추가
         # 먼저 로그인이 되어 있는 경우 바로 return 해줌
         # 유저 정보가 request에 있으면 로그인이 되어있는것
+        
+
+        print(request.POST)
+        print(request.get_full_path)
+
+        
         if request.user.is_authenticated:
             return redirect('blog:list')
         

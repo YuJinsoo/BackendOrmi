@@ -7,6 +7,7 @@
 {% endif %}
 {% endcomment %}
 
+{% comment %}
 <div class="alert alert-danger">
     <ul>
         {% for f in form %}
@@ -16,25 +17,48 @@
             {{f.label_tag}}
             {{f}}
         {%endfor%}
-        
-        {% comment %}
-        {% for k in form.errors.keys %}
-            {{ k|upper }}
-        {% endfor %}
-
-        {% for errors in form.errors.values %}
-            {% for error in errors %}
-                <li>{{error}}</li>
-            {% endfor %}
-        {% endfor %}
-
-        {% for f in form %}
-            {{f}}
-        {% endfor %}
-        {% endcomment %}
     </ul>
 </div>
+{% endcomment %}
 
+<!-- 외부 참고 -->
+<div class="alert alert-danger">
+    {% for field in form %}
+        <!-- 필드 오류 -->
+        {% if field.errors %}
+        <div>
+            <strong>{{ field.label }}</strong>
+            {{ field.errors }}
+        </div>
+        {% endif %}
+        
+        <!-- 넌필드 오류 -->
+        {% for error in form.non_field_errors %}
+        <div>
+            <strong>{{ error }}</strong>
+        </div>
+        {% endfor %}
+        <div>{{ field }}</div>
+    {% endfor %}
+</div>
+
+
+
+{% comment %}
+{% for k in form.errors.keys %}
+    {{ k|upper }}
+{% endfor %}
+
+{% for errors in form.errors.values %}
+    {% for error in errors %}
+        <li>{{error}}</li>
+    {% endfor %}
+{% endfor %}
+
+{% for f in form %}
+    {{f}}
+{% endfor %}
+{% endcomment %}
 
 
 {% comment %}

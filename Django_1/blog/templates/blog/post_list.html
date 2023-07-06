@@ -29,7 +29,7 @@
             <!-- url 하드코딩 하는 법. -->
             <!-- <td><a href="/blog/detail/{{post.pk}}/">{{ post.title }}</a></td> -->
             {% endcomment %}
-            <td>{#{{ post.content }}#}</td>
+            <td>{{ post.content|truncatechars:5 }}</td>
             {% comment %}
             장고 템플릿에서는 
             여러 줄 주석을 이렇게 넣어줘야 합니다.
