@@ -22,7 +22,7 @@ class Post(models.Model):
 
 class Comment(models.Model):
     # 변수 명을 post로 주면 table에서 column이 post_id로 생성됨
-    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="post_comment")
     content = models.TextField()
     writer = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)

@@ -8,6 +8,10 @@ from django.urls import reverse_lazy, reverse
 # auth의 mixin 기능
 from django.contrib.auth.mixins import LoginRequiredMixin
 
+# django 예외
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
+
+
 from .models import Post, Comment, HashTag
 from .forms import PostForm, CommentForm, HashTagForm
 
@@ -30,14 +34,23 @@ class Index(View):
         
         # 데이터베이스에 접근해서 값을 가져와야 합니다.
         # 게시판에 글들을 보여줘야 하기 때문에 데이터베이스에서 "값 조회"
-        # MyModel.objects.all()
-        post_objs = Post.objects.all()
+        # MyModel.objects.all() SELECT * form post
+        posts = Post.objects.all()
+        ## post의 역참조 comment를 related_name으로 해봄.
+        # for p in posts:
+        #     ## related_name을 해주지 않으면 [클래스이름_set].all() 해야함
+        #     comments = p.post_comment.all()
+        #     print(p)
+        #     print(comments)
+        #     for c in comments:
+        #         print(c)
+                
         # context = DB에서 가져온 값
         context = {
-            "posts": post_objs,
+            "posts": posts,
             'title': 'Blog'
         }
-        # print(post_objs) # Query_Set<1 ,2, 3, 4, 5>
+        # print(post_objs) # QuerySet<[post 1 ,2, 3, 4, 5]>
         return render(request, 'blog/post_list.html', context)
 
 
@@ -133,24 +146,64 @@ class DetailView(View):
     def get(self, request, post_id):
         #db에서 값 가져오기
         # 해당 글 가져오기
+        # post = Post.objects.get(pk=post_id)
+        # # 이 글에 해당하는 댓글 가져오기
+        # comments = Comment.objects.filter(post=post)
+        # # comment 생성할 Form
+        # comment_form = CommentForm()
+        # # 해쉬태그
+        # hashtags = HashTag.objects.filter(post=post)
+        # # 해쉬태그 Form
+        # hashtag_form = HashTagForm()
+        
+        ## select_related. join 사용해보기
         post = Post.objects.get(pk=post_id)
-        # 이 글에 해당하는 댓글 가져오기
-        comments = Comment.objects.filter(post=post)
-        # comment 생성할 Form
+        # comments = Comment.objects.select_related('writer').filter(post=post)
+        ## post를 직접 불러오지 않아도 id만 알아도 불러올 수 있음.
+        # comments = Comment.objects.select_related('writer').filter(post__pk=post_id)
+        comments = Comment.objects.select_related('post').filter(post__pk=post_id)
+        # comments = Comment.objects.select_related('post').first()
+        
+        # hashtags = HashTag.objects.select_related('writer').filter(post=post)
+        # hashtags = HashTag.objects.select_related('writer').filter(post__pk=post_id)
+        hashtags = HashTag.objects.select_related('post').filter(post__pk=post_id)
+        
         comment_form = CommentForm()
-        # 해쉬태그
-        hashtags = HashTag.objects.filter(post=post)
-        # 해쉬태그 Form
         hashtag_form = HashTagForm()
         
-        context = {
-            'post' : post,
-            'comments' : comments,
-            'hashtags' : hashtags,
-            'comment_form' : comment_form,
+        # print(post)
+        # print(comments)
+        # print(hashtags)
+        # print(len(comments))
+        # print(comments[0])
+        # print(comments[0].writer.email)
+        # print(comments[0].post.writer)
+        # for com in comments:
+        #     print(com)
+        # print(comments[-1].post) # QuerySet은 이거는 안됨 
+        
+        context ={
+            'post': post,
+            'comments': comments,
+            'hashtags': hashtags,
+            'comment_form': comment_form,
             'hashtag_form': hashtag_form,
             'title': 'Blog'
         }
+        # 수업... 에러
+        # context = {
+        #     'post_id' : post_id,
+        #     'post_title' : comments[0].post.title,
+        #     'post_content' : comments[0].post.content,
+        #     'post_writer' : comments[0].post.writer,
+        #     'post_created_at' : comments[0].post.created_at,
+        #     'post_updated_at': comments[0].post.updated_at,
+        #     'comments' : comments,
+        #     'hashtags' : hashtags,
+        #     'comment_form' : comment_form,
+        #     'hashtag_form': hashtag_form,
+        #     'title': 'Blog'
+        # }
         # render에서 request를 같이 전달하기 때문에 template파일에서 request를 사용할 수 있음
         return render(request, 'blog/post_detail.html', context)
 
@@ -179,7 +232,8 @@ class DetailView(View):
 #     # def get_absolute_url(self):
 class Update(View):
     def get(self, request, pk): # pk = post_id
-        post = Post.objects.get(pk=pk)
+        # get()은 조건에 해당하는 객체가 없으면 오류를 방생시킨다.
+        post = Post.objects.get(pk=pk) # <Object: post>
         form = PostForm(initial={'title': post.title, 'content':post.content})
         context = {
             'form': form,
@@ -223,10 +277,18 @@ class Delete(View):
 class CommentWrite(View):
     # def get(self, request):
     #     pass
+    
+    ''' 고도화 할사람... 
+    1. LoginRequiredMixin -> 삭제
+    2. 비회원 유저 권한 User
+    '''
     def post(self, request, post_id):
-        post = Post.objects.get(pk=post_id)
         form = CommentForm(request.POST)
         hform = HashTagForm()
+        
+        # get 관련 쿼리들은 해당 데이터가 없을 때 오류 발생
+        # get_or_404 를 사용하는걸 추천.
+        post = Post.objects.get(pk=post_id)
         
         if form.is_valid():
             # cleaned_data[field]로 가지고와야 폼에 있는 값이 정확하게 가져와집니다.
@@ -239,9 +301,22 @@ class CommentWrite(View):
             # 유저 정보 가져오기
             writer = request.user
             
-            # 댓글객체 생성. db에 접근해서 create()로 할 경우 .save()를 안해도 됨
-            # 모델 클래스로 생성할 경우에는 생성된 instance에 .save()를 해줘야 함
-            comment = Comment.objects.create(post=post, content=content, writer=writer)
+            try:
+                # 댓글객체 생성. db에 접근해서 create()로 할 경우 .save()를 안해도 됨
+                # 모델 클래스로 생성할 경우에는 생성된 instance에 .save()를 해줘야 함
+                comment = Comment.objects.create(post=post, content=content, writer=writer)
+                
+                # 있는 값. unique 값이 중복
+                
+                
+            # 외래키 --> ObjectDoesNoeExist (post 없을 때)
+            except ObjectDoesNotExist as e:
+                print('Post does not exist.', str(e))
+            
+            # 필드가 비어있을 때 -> ValidationError
+            except ValidationError as e:
+                print('Validation failed.', str(e))
+
             return redirect('blog:detail', post_id=post_id)
         
         ## 첫번째 인자로 form의 필드를 지정할 수 있음. None 대신 'content'
