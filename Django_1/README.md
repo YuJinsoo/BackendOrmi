@@ -1334,10 +1334,16 @@ request.content_type application/x-www-form-urlencoded
   - logout(request) -> 
   - authenticate(request, username, password)
 
+- request.user.is_authenticated : True, False. 로그인 여부
+- request.user type `<class 'django.utils.functional.SimpleLazyObject'>`
 
 ## request에서 알아야 하는 것.
 
 - `FILES`, `GET`, `POST`
+
+TODO - get_full_path 공부하기
+- `get_full_path`
+
 
 ### POST
 
@@ -1346,6 +1352,8 @@ request.content_type application/x-www-form-urlencoded
 ```python
 <QueryDict: {'csrfmiddlewaretoken': ['PeTb3GWNutfBXUcgCcRxf9xtCcKiOCTA6oyskB4R3hVRF84mNsEqA652TVCo6pUY'], 'content': ['aaaa'], 'index': ['2']}>
 ```
+
+---
 
 ## Server - Session, Cookie
 - 서버의 상태 유지를 위한 두 가지 도구 입니다.
@@ -1391,4 +1399,243 @@ request.content_type application/x-www-form-urlencoded
 - CSS, JS, image 파일들 -> 브라우저 안에 캐시 저장소 or 캐시 서버
 
 
+
+---
+
+# Django ORM
+
+- ORM은 Object Related Model 로, DB에 전달할 쿼리를 프레임워크에서 지원하는 것을 의미합니다.
+- Django에서 DB에 따로 접근할 필요 없이 python 언어로 DB에 쿼리를 요청할 수 있습니다.
+- SQL을 파이썬 문법으로 사용 가능하게 도와주는 기능들만
+
+
+## QuerySet 이란?
+
+- 장고에서 DB로 보낸 요청의 응답.
+
+- 쿼리함수는 SQL 구문으로 바뀜 
+- Django QuerySet   >>   SQL 구문
+- get, all                SELECT
+- create, bulk_create     INSERT
+- update, ...save         UPDATE
+- delete                  DELETE
+
+
+## select query
+
+- class.objects.all() : 데이터의모든 데이터 조회 -> `<Query Set []>`
+- class.objects.get() : 하나의 행(row)만 조회 -> `<Object: 'result'>`
+- class.objects.filter() : 해당 조건에 맞는 데이터만 조회  -> `<Query Set []>`
+- class.objects.exclude() : 해당 조건을 제외한 데이터만 조회 -> `<Query Set []>`
+- class.objects.count() : 해당 조건을 가진 데이터 개수 -> `int`
+- class.objects.exists() : 조건에 해당하는 데이터 유무 -> `boolean`.
+ HashTag.objects.filter(post=post).exists() # 이렇게 사용 가능
+ 
+- class.objects.values() : 테이블의 값을 리스트 속 딕셔너리로 반환 ->`<QuerySet [{'key':'value'}]>`
+- class.objects.values_list() : 테이블의 값을 리스트 속 튜플로 반환 -> `<QuerySet [(), ()]>`
+- class.objects.order_by() : 특정 필드를 기준으로 정렬. 조건에 (-필드명:내림차순) (필드명:오름차순) ->`<Query Set []>`
+- class.objects.fist(), last() : 쿼리셋 결과 중 가장 첫 번째, 마지막 결과 -> `<Object: 'result'>`
+- class.objects.aggregate() : 집계함수 적용 시 사용(GROUP BY). 조건에 집계함수를 넣어줌 -> `<Query Set []>`
+ User.objects.aggregate(Avg('age'))
+
+- class.objects.annotate() : 컬럼 별로 주석을 달아 집계 함수 적용시 사용(AS) -> `<Query Set []>`
+  - Post.objects.annotate(title=F("post__comment").value('title'))
+  - F(): ORM을 사용할 때, 파이썬 메모리 효율을 위해 사용하는 메서드입니다.
+    foreignkey로 연결된 것을 접근할 때 __ 로 접근할 수 있습니다.
+    데이터베이스에서 두 테이블을 연결하는 쿼리 동작 후 결과만 전달받음. (파이썬에서 join할필요없음)
+
+
+- Chaining : 쿼리함수 이어서 사용 가능
+  Post.objects.filter(writer=user).count()
+- Slicing : 쿼리셋은 list이므로 python 에서 슬라이싱이 가능합니다.
+  Post.objects.all()[:3]
+
+
+- filter, exclude 필터에 조건주기
+  - __startswith : 특정 문자로 시작
+  - __endwith : 특정 문자로 끝남
+  - __contains : 특정 문자로 포함(대소문자 구분)
+  - __icontains : 특정 문자로 포함(대소문자 구분X)
+  - __gt : 특정 값보다 큼
+  - __lt : 특정 갑보다 작음
+  - __in : 특정 문자가 있는지
+  - __isnull : 널인지?
+  - __year : 특정 년도
+  - __month : 특정 월
+  - __day : 특정 일
+  - __date : 특정 날짜(YY-MM-DD)
+  
+  - ex) User.objects.filter(date_joined__year="2023")
+   date_joined 컬럼의 year가 2023인거 찾기. 이렇게 컬럼 뒤에 조건추가할수있습니다.
+
+
+- filter()
+  - 논리연산자 사용해서 조건 여러개
+    - AND
+      Comment.objects.filter(post=post)&Comment.objects.filter(writer=writer)
+    - OR
+      Comment.objects.filter(post=post)|Comment.objects.filter(writer=writer)
+    - NOT
+      !(Comment.objects.filter(post=post))
+  - Q() 조건문 (import해줘야함)
+    - AND
+      Comment.objects.filter(Q(post=post)&Q(writer=writer))
+    - OR
+      Comment.objects.filter(Q(post=post)|Q(writer=writer))
+    - NOT
+      Comment.objects.filter(!Q(post=post))
+      Comment.objects.filter(Q(post!=post))
+  
+
+- get()은 조건에 일치하는 객체가 없으면 오류가 발생합니다.
+  - `get_object_or_404(Class, 조건)` 사용
+- filter는 조건에 맞는 객체들이 없어도 오류가 발생하지 않습니다.
+  - 빈 쿼리셋이 리턴됨
+
+
+## Insert쿼리
+- 객체(row) 혹은 객체들을 생성하는 쿼리
+
+- 하나의 객체 생성
+  - Class.objects.create() : 
+  - Post.objects.create(title=...)
+
+- 여러개의 객체 생성. 클래스로 객체
+  - Class.objects.bulk_create([]) :  생성해서 괄호 안에 넣어줘야함
+  - Post.objects.bulk_create([Post(title='t1', writer='w1',content='c1'), Post(...), ...])
+
+- 조건에 맞는 데이터가 있으면 get 없으면 create
+  - Class.objects.get_or_create(): 
+  - Post.objects.get_or_create(title='t1', writer='w1', content='c1')
+
+### Insert 쿼리 사용시 주의!
+- 생성시 unique column과 같은 값이 있으면 에러가 발생합니다.
+- create시 unique가 중복될 때, 필드가 비었을 때(null=True가 아닌 column), 외래키 관련 데이터베이스 오류 >> 에러발생
+
+- 그래서 get_or_create() 사용합니다.
+  - get_or_create() -> 2가지 리턴값
+    comment, created = Comment.objects.get_or_create(post=post, content=content, writer=writer)
+    이미 있어서 get으로 가져오게 되면 comment에 가져온 row가 들어가고, 생성이 되면 comment에 생성한 row가 들어간다.
+    create : 생성이 되면 True, get 했으면 False
+
+```python
+# 이런식으로 사용할 수 있음. id가 unique.이고 생성한다면 defaults의 값을 넣어서 생성해줍니다.
+obj, created = Person.objects.get_or_create(
+    id='John',
+    defaults={'birthday': date(1940, 10, 9)},
+)
+```
+
+  - 예시로 회원가입할때 아이디가 겹치서 오브젝트가 받아지면 다른아이디 해달라고 알림주고 없으면 생성되는 식으로 짜면 될듯.
+            
+
+## Update 쿼리  
+  - 업데이트할 객체를 변수에 저장해서 각 필드에 접근
+    post = Post.object.get(pk=pk) # row객체를 불러옴
+    post.title='new title' # 값 변경은 내 코드 안에서만...
+    post.save() # 이 시점에 데이터베이스에 반영됨
+  - 업데이트할 객체에 직접 접근  
+    Post.objects.get(pk=pk).update(content='new content') # 바로 업데이트가 됨
+
+
+## Delete 쿼리
+  - 변수에 저장해서 삭제. 저장할 필요 없음
+    
+    ```python
+    post = Post.objects.get(pk=pk)
+    post.delete()
+     혹은
+    post = Post.objects.get(pk=pk).delete()
+    ```
+
+  - Delete 실무 구현
+    - delete는 바로 삭제가 되어버리기 때문에 실무에서는 살짝 다르게 사용합니다.
+    - User: removed_user(flag) -> boolean 0,1
+      유저에 삭제유저 column을 추가하고, 해당 column의 row값이 0이면 현재유저, 1이면 삭제된 유저로 사용이 안되도록 함.
+      휴면계정, 삭제계정 이런걸.. django에서는 AbstractUser 에 is_activate 가 있음
+
+
+
+- 쿼리 고도화(JOIN)
+단일 쿼리 -> 관계가 있는 데이터를 가지고 온다.
+데이터베이스에 갔다올 때 최소한으로 갔다오는게 효율적. 그렇기 때문에 단일 쿼리를 날릴 수 있는 JOIN을 사용하는게 좋은데
+그것은 아래 두 개로 사용할 수 있습니다.
+
+  - select_related( JOIN ) : DB상에서 join을 한 후에 가져옴 (F()메서드처럼)
+    쿼리를 날리는 횟수가 적습니다. 하지만 적다고 효율적인 것은 아닙니다.
+    
+  - prefetch_related( JOIN ) : join할 대상을 DB에서 가지고 온 후 join 해줌. 
+    메모리에 각 테이블을 저장해두기 때문에 자주 사용하는 테이블들은 이게 더 효율적일 수 잇음.
+    
+    위 함수는 쿼리 안에서 (정)참조, 역참조 두 가지 모두 표현이 가능합니다.
+
+
+## 정참조 역참조
+
+```python
+# models.py
+class Post
+    title = ...
+    content = ...
+    writer = ...
+    created_at = ...
+    updated_at = ...
+
+
+class Comment
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="post_comment")
+    content = ...
+    created_at = ...
+    writer = ...
+```
+
+- Comment에서 Post를 불러오는 것은 Comment의 column 에 post가 외래키로 지정되어있음. 또한 1:N 관계에서 N에서 1을 참조하는것 : 정참조
+- Post에서 Comment를 불러오는 것은 아무런 키가 지정되어 있지 않음. 또한 1:N 관계에서 1에서 N을 참조하는 것 : 역참조
+
+- Class.objects.select_relate('column')
+- 클래스에 정의된 column이고 외래키로 지정되어 있는 경우에만 불러올 수 있습니다.
+
+- 게시글(Post)에 달린 Comment를 불러오기 위해서는 역참조를 해야 하는데 두 가지 방법이 있습니다.
+  1. [Class]_set 사용하기
+    -  호출할 때 Post.[Class]_set.all()로 가능
+
+  2. models.py에 `related_name` 설정하기
+    - Comment의 Post에 `related_name`을 설정해줍니다.
+    - 호출할 때 Post.related_name.all()로 가능
+    - related_name을 설정하면 [classname]_set.all() 은 불가능합니다.
+    - view 단에서는 post.post_comment.all(), 
+    template에서 {{ post.post_comment.all }} 을 하면 해당 게시글에 달린 모든 댓글(comment) 오브젝트들을 지정할 수 있습니다.
+
+
+- ForeignKey에 related_names를 무조건 지정할 필요는 없습니다.
+- django의 syntax를 보면 _set 을 붙이는 경우가 더 많았고, 그에 따라 일종의 코드 규칙처럼 정해진 느낌도 있습니다. 
+- 하지만 위 테이블 예시와 같이 특정 모델에서 서로 다른 두 컬럼(속성, 필드)이 같은 테이블(모델)를 참조하는 경우 는 필수로 써야합니다.
+
+TODO 더 공부해야 함.
+## Django ORM으로 JOIN
+- 참조링크 : https://wave1994.tistory.com/70
+
+- Select_related
+
+OneToOne 관계 / OneToMany 관계에서 M(Many)이 사용할 수 있다.
+또한 Sql 기능 중 하나인 join기능을 활용할 수 있게 도와주는 QuerySet이라 할 수 있는데
+Sql Query 문의 Join 과 Foreign_key(OTO, OTM) 사용하여 정참조 할 시 DB에 접근하여 QuerySet을 가져올때 미리 related  objects 까지 불러오는 메서드이다.
+비록 Query가 복잡해지지만 한번 DB에 접근하여 불러온 Data는 database 서버가 종료되기 전까지 Cache에 남아 있어
+매 Query 마라 DB에 접근하지 않아도 된다
+즉, Select_related를 사용함으로서 DB 접근 빈도를 줄여 자원 낭비를 줄일 수 있다. (불필요한 접근 및 부하) 
+
+- Perfetch_related
+Select_related 의 범위에서 더 나아가 ManyToMany 등 대부분 모든 관계에서 사용 할 수 있다.
+OneToMany 관계에서 O(One)이 사용 할 수 있다.
+Select_related와 마찬가지로 related objects를 함께 불러오는 메서드이다. 
+동일하게 Cache에 남아있게 하여 DB에 불필요한 접근을 줄여준다.
+
+- Select_related 와 Prefetch_related 차이
+
+정참조, 역참조의 차이도 있지만 실제 Join 을 어디서 하냐의 차이가 있다. 
+select_related 같은경우 DB에서 Join 을 한 채로 가져오고, 
+prefetch 는 가져와서 Python 으로 Join 을 하게 된다. 
+정말 간단하게는 Select는 DB에서 join 기능을 수행한 후 가져오므로 1 Query가 실행된다면
+Prefetch는 python에서 join 기능을 수행하므로 불러올때 1 Query를 실행하고 불러온 후 1 Query를 한번더 실행한다.
+즉, 가급적 Select_related를 사용하는것이 효율적이라 할 수 있겠다.
 
