@@ -6,8 +6,8 @@
 <form action="{% url 'user:login' %}" method="post">
     {% csrf_token %}
     {{ form.as_p }}
-    <input type="submit" value="로그인">
     <input type="hidden" name="next" value="{{ togo }}" >
+    <input type="submit" value="로그인">
 </form>
 
 

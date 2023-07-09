@@ -88,8 +88,10 @@ class Login(View):
             if user:
                 login(request, user)
                 
-                if request.POST["next"] != "None" :
-                    return redirect(request.POST["next"])
+                # print(form.cleaned_data['next']) # input에 next있지만 form으로는 검색안됨. form filed에 추가해도안됨
+                
+                if request.POST['next'] != "None":
+                    return redirect(request.POST['next'])
                 
                 return redirect('blog:list')
             
@@ -98,7 +100,8 @@ class Login(View):
         
         context = {
             'form': form, ## 에러가 들어간 폼
-            'title': 'User'
+            'title': 'User',
+            'togo': None
         }
         return render(request, 'user/user_login.html', context=context)
     
