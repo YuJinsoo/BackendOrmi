@@ -66,3 +66,11 @@ class User(AbstractUser):
     
     # def __str__(self):
     #     return self.name
+
+
+class Profile(models.Model):
+    user = models.OneToOneField('User', on_delete=models.CASCADE)
+    ## imagefield를 사용하려면 python 패키지 Pillow를 설치해야 합니다.
+    image = models.ImageField(upload_to='user/media') 
+    age = models.IntegerField()
+    created_at = models.DateField(auto_now=True)

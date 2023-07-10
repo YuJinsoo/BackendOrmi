@@ -112,19 +112,27 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = "ko-kr"
+# LANGUAGE_CODE = "ko-kr"
+LANGUAGE_CODE = "en-us" # 영어
 
 TIME_ZONE = "Asia/Seoul"
 
+# 다국가 언어코드 사용
 USE_I18N = True
 
 USE_TZ = True
 
+LANGUAGES = [
+    ('en', 'English'), # 첫번째가 기본언어!   LANGUAGE_CODE랑 일치해야함.
+    ('kr', 'Korean')
+]
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = "static/"
+# STATIC_URL = "static/" # 이거는 app 폴더 안에 static/폴더
+STATIC_URL =  "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

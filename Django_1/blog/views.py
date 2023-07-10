@@ -168,6 +168,12 @@ class DetailView(View):
         # hashtags = HashTag.objects.select_related('writer').filter(post__pk=post_id)
         hashtags = HashTag.objects.select_related('post').filter(post__pk=post_id)
         
+        ## prefetch_related join 사용해보기
+        # 각각 불러오는것 것과 같아보이지만, 쿼리 횟수가 다름.
+        # post = Post.objects.prefetch_related('post_comment','hashtag_set').get(pk=post_id)  # 쿼리 1회
+        # comments = post.post_comment.all() # 쿼리 X
+        # hashtags = post.hashtag_set.all() # 쿼리 X
+        
         comment_form = CommentForm()
         hashtag_form = HashTagForm()
         

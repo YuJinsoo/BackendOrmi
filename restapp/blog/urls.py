@@ -8,35 +8,22 @@ urlpatterns = [
     # 패턴에 빈 str이면 index페이지를 의미합니다.
     # path("", views.index) # FBV 방식
     
-    # 글 목록조회
-    # CBV 방식
-    # path("", Index.as_view()),  ## 이렇게 하려면 # from blog.views import Index #해줘야함
-    # path("", views.Index.as_view(), name='list'),
-    # path("", views.Index.as_view(), name='list'),
-    
+    # 글 목록 조회
+    path("", views.Index.as_view(), name='list'), # /blog/
     # # 글 상세 조회
-    # # path("detail/<int:pk>/", views.Detail.as_view(), name='detail'), #/blog/detail/1
-    # path("detail/<int:post_id>/", views.DetailView.as_view(), name='detail'),
-    
+    # path("detail/<int:pk>/", views.DetailView.as_view(), name='detail'), # /blog/detail/1
     # # 글 작성
-    # # path("write/", views.write, name='write'),
-    # path("write/", views.Write.as_view(), name='write'),
-    
+    path("write/", views.Write.as_view(), name='write'), # /blog/write/
     # # 글 수정
-    # path("detail/<int:pk>/edit/", views.Update.as_view(), name='edit'),
-    
+    path("detail/<int:pk>/edit/", views.Update.as_view(), name='edit'),
     # # 글 삭제
-    # path("detail/<int:pk>/delete/", views.Delete.as_view(), name='delete'),
-    
+    path("detail/<int:pk>/delete/", views.Delete.as_view(), name='delete'),
     # # 코멘트 작성
-    # path("detail/<int:post_id>/comment/write", views.CommentWrite.as_view(), name = 'cm-write'),
-    
+    # path("detail/<int:pk>/comment/write/", views.CommentWrite.as_view(), name='cm-write'),
     # # 코멘트 삭제
-    # path("detail/comment/<int:pk>/delete", views.CommentDelete.as_view(), name="cm-delete"),
-    
-    # # 태그 쓰기
-    # path("detail/<int:post_id>/hashtag/write", views.HashTagWrite.as_view(), name="tag-write"),
-    
+    # path("detail/comment/<int:pk>/delete/", views.CommentDelete.as_view(), name='cm-delete'),
+    # # 태그 작성
+    # path("detail/<int:pk>/hashtag/write/", views.HashTagWrite.as_view(), name='tag-write'),
     # # 태그 삭제
-    # path("detail/hashtag/<int:tag_id>/delete", views.HashTagDelete.as_view(), name="tag-delete"),
+    # path("detail/<int:pk>/hashtag/delete/", views.HashTagDelete.as_view(), name='tag-delete'),
 ]

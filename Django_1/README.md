@@ -1452,6 +1452,7 @@ TODO - get_full_path 공부하기
 
 
 - filter, exclude 필터에 조건주기
+  - __pk : id
   - __startswith : 특정 문자로 시작
   - __endwith : 특정 문자로 끝남
   - __contains : 특정 문자로 포함(대소문자 구분)
@@ -1611,31 +1612,154 @@ class Comment
 - django의 syntax를 보면 _set 을 붙이는 경우가 더 많았고, 그에 따라 일종의 코드 규칙처럼 정해진 느낌도 있습니다. 
 - 하지만 위 테이블 예시와 같이 특정 모델에서 서로 다른 두 컬럼(속성, 필드)이 같은 테이블(모델)를 참조하는 경우 는 필수로 써야합니다.
 
-TODO 더 공부해야 함.
+
 ## Django ORM으로 JOIN
 - 참조링크 : https://wave1994.tistory.com/70
 
-- Select_related
+### Select_related
 
-OneToOne 관계 / OneToMany 관계에서 M(Many)이 사용할 수 있다.
-또한 Sql 기능 중 하나인 join기능을 활용할 수 있게 도와주는 QuerySet이라 할 수 있는데
-Sql Query 문의 Join 과 Foreign_key(OTO, OTM) 사용하여 정참조 할 시 DB에 접근하여 QuerySet을 가져올때 미리 related  objects 까지 불러오는 메서드이다.
-비록 Query가 복잡해지지만 한번 DB에 접근하여 불러온 Data는 database 서버가 종료되기 전까지 Cache에 남아 있어
-매 Query 마라 DB에 접근하지 않아도 된다
-즉, Select_related를 사용함으로서 DB 접근 빈도를 줄여 자원 낭비를 줄일 수 있다. (불필요한 접근 및 부하) 
+- 정참조: ForeignKey ( OneToMany 관계에서 M(Many)이 사용할 수 있다. (1에서 M은 못 부름) )
+- 역참조: OneToOne 관계 
 
-- Perfetch_related
-Select_related 의 범위에서 더 나아가 ManyToMany 등 대부분 모든 관계에서 사용 할 수 있다.
-OneToMany 관계에서 O(One)이 사용 할 수 있다.
-Select_related와 마찬가지로 related objects를 함께 불러오는 메서드이다. 
-동일하게 Cache에 남아있게 하여 DB에 불필요한 접근을 줄여준다.
+- 또한 Sql 기능 중 하나인 join기능을 활용할 수 있게 도와주는 QuerySet이라 할 수 있는데
+- Sql Query 문의 Join 과 Foreign_key(OTO, OTM) 사용하여 정참조 할 시 DB에 접근하여 QuerySet을 가져올때 미리 related  objects 까지 불러오는 메서드이다.
+- 비록 Query가 복잡해지지만 한번 DB에 접근하여 불러온 Data는 database 서버가 종료되기 전까지 Cache에 남아 있어 매 Query 마다 DB에 접근하지 않아도 된다.
+- 즉, Select_related를 사용함으로서 DB 접근 빈도를 줄여 자원 낭비를 줄일 수 있다. (불필요한 접근 및 부하) 
 
-- Select_related 와 Prefetch_related 차이
+- 예시
+```python
+Comment.objects.select_related('post').filter(post__pk=pk)
+HashTag.objects.select_related('post').filter(post__pk=pk)
+```
 
-정참조, 역참조의 차이도 있지만 실제 Join 을 어디서 하냐의 차이가 있다. 
-select_related 같은경우 DB에서 Join 을 한 채로 가져오고, 
-prefetch 는 가져와서 Python 으로 Join 을 하게 된다. 
-정말 간단하게는 Select는 DB에서 join 기능을 수행한 후 가져오므로 1 Query가 실행된다면
-Prefetch는 python에서 join 기능을 수행하므로 불러올때 1 Query를 실행하고 불러온 후 1 Query를 한번더 실행한다.
-즉, 가급적 Select_related를 사용하는것이 효율적이라 할 수 있겠다.
+### Perfetch_related
 
+- 정참조: ManyToMany
+- 역참조: ManyToMany, ForeignKey(OneToMany 관계에서 O(One)이 사용 할 수 있다.)
+
+- select_related 의 범위에서 더 나아가 ManyToMany 등 대부분 모든 관계에서 사용 할 수 있다.
+
+- select_related와 마찬가지로 related objects를 함께 불러오는 메서드입니다. 
+- 동일하게 Cache에 남아있게 하여 DB에 불필요한 접근을 줄여준다.
+
+- 예시
+```python
+Post.objects.prefetch_related('comment_set', 'hashtag_set').get(pk=pk)
+```
+
+> Select_related 와 Prefetch_related 차이
+  - 정참조, 역참조의 차이도 있지만 실제 Join 을 어디서 하냐의 차이가 있습니다.
+  - `select_related` 경우 DB에서 Join 을 한 채로 가져오고, `prefetch` 는 가져와서 Python 으로 Join 을 합니다. 
+  - 정말 간단하게는 Select는 DB에서 join 기능을 수행한 후 가져오므로 1 Query가 실행된다면 Prefetch는 python에서 join 기능을 수행하므로 불러올때 1 Query를 실행하고 불러온 후 1 Query를 한번더 실행합니다.
+  - 즉, 가급적 Select_related를 사용하는것이 효율적이라 할 수 있겠다.??
+
+
+---
+
+## static 파일, media 파일
+
+### static files은 모아서 관리합니다.
+- static: 서버에서 제공하는 파일들(html, css, JavaScript, image -> 용량이 큼, 잘 변하지 않음)
+
+- 스태틱 파일 모아서 관리하기
+  1. static 파일을 업로드
+  2. django에게 static파일을 고정해서 사용할 것을 알려줌
+    - settings.py에 static 파일들이 어디에 있는지 알려주기 (`STATIC_URL`, `STATIC_ROOT`)
+    - 명령어 : `python manage.py collectstatic`
+    - static 이라는 폴더에 있는 파일들을 한 곳으로 모아준다. -> `STATIC_ROOT`에 설정한 경로로 파일들이 모임
+    - app의 static을 수정해서 staticfiles걸로 적용되기 때문에 바로 적용이 되지 않음.
+    - app 파일을 다시 적용하려면 위 명령어를 다시 한번 쳐야 함.
+
+- 경로 설정
+```python
+#settings.py
+
+# STATIC_URL = "static/" # 이거는 app 폴더 안에 static/폴더
+STATIC_URL =  "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+```
+
+> 왜 모아줘야 하나?
+  - Django는 실질적으로 웹서버가 아니라 웹 애플리케이션을 개발하는 프레임워크입니다.
+  - 웹 애플리케이션은 웹서버가 받은 요청을 넘겨주면 로직에 맞추어 데이터를 처리한 후
+  웹서버에게 돌려주어 사용자에게 응답하게 하는 역할을 합니다.
+
+  - 사용자에게 단지 정적 파일을 담아 응답하는 것은 웹서버 자체에서 할 수 있기때문에 굳이 웹 애플리케이션에서 처리할 필요가 없습니다. 
+  - 오히려 웹 애플리케이션을 거치게 되면 wsgi(웹서버와 웹 애플리케이션 간의 통신을 위한 인터페이스)를 거쳐야하므로 비효율적인 로직이 하나 더 늘어납니다.
+
+  - 그래서  Django에서는 static 파일을 직접 처리하는 기능을 담고있지 않습니다.
+  - 프로젝트를 실제로 배포할 때 collectstatic을 통해 프로젝트 내에 흩어져있는 static 파일들(각각의 앱에 딸린 static폴더)를 한군데에 모은 뒤 서버로 복사해줍니다.
+
+  - 이렇게 모으는 과정을 거치면 실제 배포되는 웹서버는 웹 애플리케이션이 복사해준 static 파일들을 저장한 뒤 클라이언트의 요청에 직접 응답할 수 있게 됩니다.
+
+
+### media 파일
+- media: 사용자에게 받아온 파일들(image, file)
+- 미디어파일도 static file처럼 경로를 설정해 줄 수 있습니다.
+- 일반적으로는 서버보다는 DB나 외부 스토리지에 저장합니다..
+
+
+
+---
+
+## 언어 번역 기능 Translate (DRF말고 Django에서 함)
+- 언어 -> 단어,문장 -> 번역기능 + 템플릿 엔진(태그)
+
+- 언어 번역 기능은 요청에 따라 웹 페이지에 적용할 언어를 다르게 설정할 수 있습니다.
+
+1. settings.py 에 아래와 같이 설정이 되어 있어야 합니다.
+- I18N 이 활성화되어 있어야 번역 기능을 사용할 수 있습니다.
+```python
+# settings.py
+
+# 다국가 언어코드 사용
+USE_I18N = True
+
+USE_TZ = True
+```
+
+- 번역할 언어 순서를 설정합니다.
+- 처음 있는 언어는 반드시 `LANGUAGE_CODE`와 일치해야 합니다.
+- settings.py에 언어 순서 설정
+```python
+# settings.py
+
+LANGUAGES = [
+    ('en', 'English'),
+    ('kr', 'Korean'),
+]
+```
+
+2. 언어 번역 기능을 적용할 템플릿의 가장 위에 `{% load i18n %}` 태그를 아래와 같이 추가합니다.
+- 하지만 `{% block extends %}` 보다 아래에 위치해야 합니다.
+- 번역할 부분을 {% trans "~~~"%} 로 감싸서 표시해줍니다.
+- trans로 표기한 부분이 번역파일에 추가되기 때문입니다.
+```html
+{% load i18n %}
+...
+    <h2>{% trans "Welcome!!" %}</h2>
+    ...
+```
+
+3. 이제부터 번역 파일을 생성할 것입니다.
+- locale 폴더 생성 후
+> python manage.py makemessages -l en
+
+- `.po 파일`이 생성되면 번역 파일 직접 수정해주기. (.po는사람이 인식)
+- msgid는 작성한 언어 표기이고, msgstr은 번역할 내용을 담습니다.
+```plaintext
+<!-- django.po -->
+<!-- 위에 trans로 표기한 부분. -->
+#: .\templates\index.html:6
+msgid "Welcome!!"
+msgstr "어서오세요 반갑습니다!"
+
+```
+
+4. 수정이 완료되었다면 po파일을 컴파일해 Djangor가 인식할 수 있는 .mo파일로 변환합니다.
+> python manage.py compilemessages
+- .mo 파일 생성됨( 장고가 인식할 수 있는 번역파일)
+
+> 이걸 해야하는이유? 하는 이유? 필요성?
+  - 사용자의 요청이 들어오거나 로그인할때 정보를 가지고 언어 세팅을 해줌.
+  - 이때 mo 파일을 만들어두면 템플릿에 `trans`로 표현한 부분은 자동으로 바뀌어져 있습니다.
