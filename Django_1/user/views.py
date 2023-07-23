@@ -95,8 +95,8 @@ class Login(View):
                 
                 return redirect('blog:list')
             
-            # 폼에 에러를 추가해줍니다.
-            form.add_error(None, '아이디가 없습니다.')
+        # 폼에 에러를 추가해줍니다.
+        form.add_error(None, '아이디가 없습니다.')
         
         context = {
             'form': form, ## 에러가 들어간 폼

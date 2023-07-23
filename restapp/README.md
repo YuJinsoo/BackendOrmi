@@ -43,6 +43,68 @@
 >> 왜 이렇게 하나?? 서버의 부담을 줄이기 위한 RESTful 한 개발?
 
 
+## DRF의 request
+
+- DRF는 HttpRequest를 Request 객체로 확장하여 더 유연한 요청 파싱을 제공한다. 핵심 기능은 requst.POST와 비슷하지만 웹 API에 더 유용한 request.data 속성이다.
+
+## DRF의 Response
+
+
+## DRF의 데이터 흐름
+
+- DB에서 JSON
+```plain text
+DB --> querySet / Model --> OrderedDict(ReturnDict) --> JSON
+                    serializer()                 JSONRenderer.render()
+```
+
+```python
+content = JSONRenderer().render(serializer.data)
+content 
+#  b'{"id": 2, "title": "", "code": "print(\\"hello, world\\")\\n", "linenos": false, "language": "python", "style": "friendly"}'
+# 바이너리 데이터. JSON형식으로 바뀌었다고 볼 수 있음.
+```
+
+- JSON에서 DB
+```plaintext
+DB <-- querySet / Model <-- OrderedDict(ReturnDict) <-- JSON
+          serializer(data = ).save()      io.BytesIO(content)/ JSONParser().parse(stream)
+
+```
+
+
+
+## 상태코드
+
+```python
+
+from rest_framework import status
+from rest_framework.response import Response
+
+def empty_view(self):
+    content = {'please move along': 'nothing to see here'}
+    return Response(content, status=status.HTTP_404_NOT_FOUND)
+```
+
+```python
+from rest_framework import status
+from rest_framework.test import APITestCase
+
+class ExampleTestCase(APITestCase):
+    def test_url_root(self):
+        url = reverse('index')
+        response = self.client.get(url)
+        self.assertTrue(status.is_success(response.status_code))
+        
+```
+
+
+- https://www.django-rest-framework.org/api-guide/status-codes/
+
+
+
+
+
 ## DRF로 설계한 응답 확인하기 - Postman
 
 - 기존 개발 방식과 다르게 Django Rest Framework으로 개발을 하게 되면 API 통신을 이용하게 됩니다. 
@@ -76,3 +138,25 @@
 
 
 위와 같은 설정으로 csrf token을 가지고 온 뒤, POST 요청을 테스트하시면 결과를 화면없이 확인할 수 있습니다 🙂
+
+
+
+## OneToOne관계
+
+- `User`와 `Profile` 관계를 OneToOne으로 설정하고 Profile이 User를 참조하도록 했습니다.
+
+- 이런 상황에서 user에서 profile을 역참조 하는 방법은 아래와 같습니다.
+- 같은 테이블에 있는 것처럼 profile을 . 으로 이어서 호출해주면 역참조도 접근이 가능합니다.
+- OneToMany에서는 `..._set`이나 `realated_name` 을 사용해서 역참조를 합니다.
+
+```python
+#views.py
+
+class ProfileView(APIView):
+    def get(self, request):
+        user = request.user
+        profile = user.profile # OneToOne 관계 역참조
+        serializer = ProfileSerializer(profile)
+        return Response(serializer.data)
+
+```

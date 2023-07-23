@@ -204,7 +204,7 @@ class Login(View):
 ### Logout
 class Logout(View):
     def get(self, request):
-        serializer = UserSerializer(request.data.user)
+        serializer = UserSerializer(request.user)
         logout(request)
         # return redirect('blog:list')
         return Response(serializer.data)
@@ -212,12 +212,29 @@ class Logout(View):
     
 
 ### Profile
+class ProfileView(APIView):
+    def get(self, request):
+        user = request.user
+        
+        if user.is_authenticated :
+            profile = user.profile
+            print(request.user.id)
+            print(profile)
+            # print(profile)
+            serializer = ProfileSerializer(profile)
+            return Response(serializer.data)
+        
+        return Response('{"message": "로그인이 필요합니다."}')
+
+
+## User와 Profile이 OneToOne관계이기 때문에 만들어진 상태에서 다시 요청하면 실행되지 않습니다.
 class ProfileWrite(APIView):
     # def get(self, request):
     #     pass
     
     def post(self, request):
-        user = request.data.get('user')
+        # user = request.data.get('user')
+        user = request.user
         image = request.data.get('image')
         age = request.data.get('age')
         
