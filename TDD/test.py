@@ -1,0 +1,29 @@
+import unittest
+
+def add(x, y):
+    return x + y
+
+class TestAdd(unittest.TestCase):
+    def test_add(self):
+        self.assertEqual(add(1, 2), 3)
+    
+    def test_add2(self):
+        self.assertEqual(add(1, 2), 3)
+    
+    def test_add3(self):
+        self.assertEqual(add(1, 2), 3)
+
+
+# 메서드 정의순 X 알파펫 순서로 함
+
+# 많이 사용하는...
+# self.assertEqual(1 + 2, 3)
+# self.assertTrue(10 == 10)
+# self.assertFalse(1 == 10)
+# self.assertGreater(10, 1)
+# self.assertLess(1, 10)
+# self.assertIn(1, [1, 2, 3, 4, 5])
+# self.assertIsInstance('a', str)
+
+if __name__ == '__main__':
+    unittest.main()
