@@ -72,3 +72,19 @@ $ git log --all --decorate --oneline --graph
 - `git push` 할 때에는 이미 연결된 곳에 push 할 수 있지만, 원격 저장소에 해당 브랜치가 없는 경우에는 `git push -u origin <브랜치명>`을 실행해주어야 이후에 간단히 push 할 수 있습니다. `-u` 옵션이 `--set-upstream` 입니다.
 - 여기서 origin은 키워드가 아닙니다. one, two등에 이름으로 할 수 있어요. 이는 여러 원격 저장소를 연결할 수 있기 때문입니다.
 - 위 내용에 이어 main이 어느 원격 저장소(GitHub인지 GitLab인지 또는 그 외인지)의 main인지 알 수 없기 때문에 설정해주는 설정입니다.
+
+
+### 브랜치 병합하기
+
+- branch로 나누어 작업했던 것을 병합하는 명령어입니다.
+```shell
+$ git checkout main
+$ git log
+$ git merge binky
+$ git log
+```
+
+- merge가 완료되었으면 push 까지 해주셔야 원격 저장소에 반영이 됩니다.
+```shell
+$ git push origin main
+```
